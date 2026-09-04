@@ -1,0 +1,75 @@
+export type MuscleGroup =
+  | 'chest'
+  | 'front_delts'
+  | 'side_delts'
+  | 'rear_delts'
+  | 'lats'
+  | 'traps'
+  | 'upper_back'
+  | 'lower_back'
+  | 'biceps'
+  | 'triceps'
+  | 'forearms'
+  | 'abs'
+  | 'obliques'
+  | 'quads'
+  | 'hamstrings'
+  | 'glutes'
+  | 'calves'
+
+export type ExerciseCategory = 'push' | 'pull' | 'legs' | 'core' | 'cardio'
+
+export interface Exercise {
+  id: string
+  name: string
+  category: ExerciseCategory
+  muscles: { group: MuscleGroup; role: 'primary' | 'secondary' }[]
+}
+
+export type WeightUnit = 'lb' | 'kg'
+
+export interface SetEntry {
+  reps: number
+  weight: number
+  unit: WeightUnit
+  /** RPE 1-10. Absent for planned sets; filled in when the workout is marked done. */
+  intensity?: number
+}
+
+export interface WorkoutEntry {
+  exerciseId: string
+  sets: SetEntry[]
+}
+
+export type WorkoutStatus = 'planned' | 'completed'
+
+export interface WorkoutSession {
+  id: string
+  date: string
+  notes?: string
+  entries: WorkoutEntry[]
+  status: WorkoutStatus
+}
+
+export type HeightUnit = 'in' | 'cm'
+
+export type FitnessGoal = 'lose_weight' | 'build_muscle' | 'lean_tone' | 'bulk_strength' | 'general_fitness'
+
+export interface Profile {
+  id: string
+  fullName: string
+  weight: number
+  weightUnit: WeightUnit
+  height: number
+  heightUnit: HeightUnit
+  goals: FitnessGoal[]
+}
+
+export interface SignUpProfileInput {
+  fullName: string
+  weight: number
+  weightUnit: WeightUnit
+  height: number
+  heightUnit: HeightUnit
+  goals: FitnessGoal[]
+}
