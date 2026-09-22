@@ -7,10 +7,14 @@ interface ActivityLineChartProps {
 
 const WIDTH = 640
 const HEIGHT = 320
-const PADDING = { top: 10, right: 10, bottom: 24, left: 40 }
+const PADDING = { top: 14, right: 10, bottom: 26, left: 40 }
 const PLOT_WIDTH = WIDTH - PADDING.left - PADDING.right
 const PLOT_HEIGHT = HEIGHT - PADDING.top - PADDING.bottom
-const LINE_COLOR = '#4f46e5' // indigo-600, the app's existing brand/primary color
+// Theme colours (see index.css). SVG presentation attributes can't read CSS
+// variables, so these are applied through the style prop.
+const LINE_COLOR = 'var(--c-accent)'
+const GRID_COLOR = 'var(--c-line)'
+const LABEL_COLOR = 'var(--c-muted)'
 
 function formatShortDate(iso: string): string {
   return new Date(`${iso}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -53,8 +57,12 @@ export function ActivityLineChart({ series }: ActivityLineChartProps) {
   const gridLines = [0, 0.5, 1]
   const hovered = hoverIndex !== null ? points[hoverIndex] : null
 
-  const tooltipWidth = 96
+  const tooltipWidth = 104
+  const tooltipHeight = 36
   const tooltipX = hovered ? Math.min(Math.max(hovered.x - tooltipWidth / 2, 0), WIDTH - tooltipWidth) : 0
+  // Above the point, or below it when there's no room at the top.
+  const tooltipAbove = hovered ? hovered.y - tooltipHeight - 12 : 0
+  const tooltipY = hovered ? (tooltipAbove < 0 ? hovered.y + 14 : tooltipAbove) : 0
 
   // A handful of evenly-spaced x-axis labels -- all 30 would be too crowded.
   const labelCount = Math.min(5, series.length)
@@ -72,8 +80,8 @@ export function ActivityLineChart({ series }: ActivityLineChartProps) {
     >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={LINE_COLOR} stopOpacity="0.25" />
-          <stop offset="100%" stopColor={LINE_COLOR} stopOpacity="0" />
+          <stop offset="0%" style={{ stopColor: LINE_COLOR, stopOpacity: 0.22 }} />
+          <stop offset="100%" style={{ stopColor: LINE_COLOR, stopOpacity: 0 }} />
         </linearGradient>
       </defs>
 
@@ -81,8 +89,24 @@ export function ActivityLineChart({ series }: ActivityLineChartProps) {
         const gy = PADDING.top + PLOT_HEIGHT * (1 - g)
         return (
           <g key={g}>
-            <line x1={PADDING.left} y1={gy} x2={WIDTH - PADDING.right} y2={gy} stroke="#e5e7eb" strokeWidth={1} />
-            <text x={PADDING.left - 6} y={gy} textAnchor="end" dominantBaseline="middle" fontSize={9} fill="#9ca3af">
+            <line
+              x1={PADDING.left}
+              y1={gy}
+              x2={WIDTH - PADDING.right}
+              y2={gy}
+              strokeWidth={1}
+              strokeDasharray={g === 0 ? undefined : '4 4'}
+              style={{ stroke: GRID_COLOR }}
+            />
+            <text
+              x={PADDING.left - 8}
+              y={gy}
+              textAnchor="end"
+              dominantBaseline="middle"
+              fontSize={10}
+              fontWeight={600}
+              style={{ fill: LABEL_COLOR }}
+            >
               {formatVolume(maxVolume * g)}
             </text>
           </g>
@@ -90,10 +114,26 @@ export function ActivityLineChart({ series }: ActivityLineChartProps) {
       })}
 
       <path d={areaPath} fill={`url(#${gradientId})`} stroke="none" />
-      <path d={linePath} fill="none" stroke={LINE_COLOR} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+      <path
+        d={linePath}
+        fill="none"
+        strokeWidth={2.75}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        style={{ stroke: LINE_COLOR }}
+      />
 
-      {labelIndices.map((i) => (
-        <text key={i} x={x(i)} y={HEIGHT - 6} textAnchor="middle" fontSize={9} fill="#9ca3af">
+      {labelIndices.map((i, n) => (
+        <text
+          key={i}
+          x={x(i)}
+          y={HEIGHT - 6}
+          // The outer labels sit on the chart edges, so anchor them inward to avoid clipping.
+          textAnchor={n === 0 ? 'start' : n === labelIndices.length - 1 ? 'end' : 'middle'}
+          fontSize={10}
+          fontWeight={600}
+          style={{ fill: LABEL_COLOR }}
+        >
           {formatShortDate(series[i].date)}
         </text>
       ))}
@@ -105,16 +145,23 @@ export function ActivityLineChart({ series }: ActivityLineChartProps) {
             y1={PADDING.top}
             x2={hovered.x}
             y2={baseline}
-            stroke="#c7d2fe"
-            strokeWidth={1}
+            strokeWidth={1.5}
+            strokeDasharray="4 4"
+            style={{ stroke: 'var(--c-faint)' }}
           />
-          <circle cx={hovered.x} cy={hovered.y} r={4} fill={LINE_COLOR} stroke="white" strokeWidth={1.5} />
-          <g transform={`translate(${tooltipX}, ${Math.max(hovered.y - 34, PADDING.top)})`}>
-            <rect width={tooltipWidth} height={28} rx={6} fill="#111827" opacity={0.9} />
-            <text x={tooltipWidth / 2} y={11} textAnchor="middle" fontSize={9} fill="white">
+          <circle
+            cx={hovered.x}
+            cy={hovered.y}
+            r={6}
+            strokeWidth={3}
+            style={{ fill: LINE_COLOR, stroke: 'var(--c-surface)' }}
+          />
+          <g transform={`translate(${tooltipX}, ${tooltipY})`}>
+            <rect width={tooltipWidth} height={tooltipHeight} rx={12} style={{ fill: 'var(--c-coach)' }} />
+            <text x={tooltipWidth / 2} y={14} textAnchor="middle" fontSize={10} fontWeight={500} fill="#d4d4d8">
               {formatShortDate(hovered.date)}
             </text>
-            <text x={tooltipWidth / 2} y={22} textAnchor="middle" fontSize={9} fontWeight="bold" fill="white">
+            <text x={tooltipWidth / 2} y={27} textAnchor="middle" fontSize={11} fontWeight={800} fill="white">
               {formatVolume(hovered.volume)} vol
             </text>
           </g>

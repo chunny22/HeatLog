@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../auth/AuthContext'
+import { Alert } from '../components/Alert'
+import { RefreshIcon, TrashIcon } from '../components/icons'
+import { cardClass, iconBtnDangerClass, pageClass, pageTitleClass } from '../components/ui'
 import { useConfirm } from '../hooks/useConfirm'
 import { supabase } from '../supabase'
 
@@ -52,40 +55,48 @@ export function AdminPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
-      <h1 className="mb-4 text-lg font-semibold text-gray-900">Admin — Accounts</h1>
+    <div className={pageClass}>
+      <h1 className={pageTitleClass}>Admin — Accounts</h1>
 
-      {loading && <p className="text-sm text-gray-400">Loading…</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {loading && <p className="text-sm text-muted">Loading…</p>}
+      {error && <Alert tone="error">{error}</Alert>}
 
       {!loading && !error && (
-        <div className="overflow-hidden rounded-xl border border-gray-200">
+        <section className={`${cardClass} overflow-x-auto p-2 sm:p-3`}>
           <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-xs text-gray-500">
+            <thead className="text-xs font-bold tracking-[0.06em] text-muted uppercase">
               <tr>
-                <th className="px-4 py-2 font-medium">Email</th>
-                <th className="px-4 py-2 font-medium">Joined</th>
-                <th className="px-4 py-2 font-medium"></th>
+                <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">Joined</th>
+                <th className="px-4 py-3">
+                  <span className="sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-line">
               {users.map((user) => {
                 const isSelf = user.id === session?.user.id
                 return (
                   <tr key={user.id}>
-                    <td className="px-4 py-2 text-gray-800">
+                    <td className="px-4 py-3 font-semibold text-ink">
                       {user.email}
-                      {isSelf && <span className="ml-2 text-xs text-gray-400">(you)</span>}
+                      {isSelf && (
+                        <span className="ml-2 rounded-full bg-accent-soft px-2 py-0.5 text-xs font-bold text-accent-ink">
+                          you
+                        </span>
+                      )}
                     </td>
-                    <td className="px-4 py-2 text-gray-500">{new Date(user.createdAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-ink-3">{new Date(user.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-2 text-right">
                       {!isSelf && (
                         <button
                           onClick={() => handleDelete(user)}
                           disabled={deletingId === user.id}
-                          className="text-xs text-red-500 hover:underline disabled:opacity-50"
+                          aria-label={`Delete ${user.email}`}
+                          title="Delete account"
+                          className={`${iconBtnDangerClass} ml-auto`}
                         >
-                          {deletingId === user.id ? 'Deleting…' : 'Delete'}
+                          {deletingId === user.id ? <RefreshIcon size={16} className="animate-spin" /> : <TrashIcon size={17} />}
                         </button>
                       )}
                     </td>
@@ -94,7 +105,7 @@ export function AdminPage() {
               })}
             </tbody>
           </table>
-        </div>
+        </section>
       )}
       {dialog}
     </div>

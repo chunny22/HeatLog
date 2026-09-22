@@ -1,12 +1,136 @@
 @import "tailwindcss";
 
+/* `dark:` follows the app's theme setting (Light / Dark / System), not just the OS. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/*
+ * Design tokens. Every colour has a light and a dark value; components only
+ * use the Tailwind names below (bg-surface, text-ink, ...), so switching
+ * `data-theme` on <html> re-themes the whole app at once.
+ */
 :root {
   color-scheme: light;
+  --c-page: #f5f5f2;
+  --c-surface: #ffffff;
+  --c-sunken: #f0f0ec;
+  --c-inset: #f5f5f2;
+  --c-track: #e9e9e4;
+  --c-selected: #ffffff;
+  --c-line: #e6e5e0;
+  --c-popover: #ffffff;
+  --c-ink: #18181b;
+  --c-ink-2: #3f3f46;
+  --c-ink-3: #52525b;
+  --c-muted: #71717a;
+  --c-faint: #a1a1aa;
+  --c-accent: #4f46e5;
+  --c-accent-hover: #4338ca;
+  --c-accent-soft: #eae9fc;
+  --c-accent-ink: #3731a0;
+  --c-success: #16a34a;
+  --c-success-soft: #dcfce7;
+  --c-success-ink: #166534;
+  --c-warning-soft: #fef3c7;
+  --c-warning-ink: #92400e;
+  --c-danger: #dc2626;
+  --c-danger-hover: #b91c1c;
+  --c-danger-soft: #fee2e2;
+  --c-danger-ink: #b91c1c;
+  --c-coach: #18181b;
+  --c-coach-2: #2e2e33;
+  --c-silhouette: #e9e9e4;
+  --c-nodata: #e2e2dd;
+  --sh-card: 0 1px 2px rgb(24 24 27 / 0.04), 0 8px 24px rgb(24 24 27 / 0.05);
+  --sh-pop: 0 0 0 1px rgb(24 24 27 / 0.05), 0 16px 40px rgb(24 24 27 / 0.16);
+  --sh-raised: 0 1px 3px rgb(24 24 27 / 0.12);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --c-page: #0f0f11;
+  --c-surface: #1c1c1f;
+  --c-sunken: #2a2a2f;
+  --c-inset: #0f0f11;
+  --c-track: #2a2a2f;
+  --c-selected: #3f3f46;
+  --c-line: #2e2e33;
+  --c-popover: #232327;
+  --c-ink: #f4f4f5;
+  --c-ink-2: #d4d4d8;
+  --c-ink-3: #a1a1aa;
+  --c-muted: #8b8b93;
+  --c-faint: #5a5a62;
+  --c-accent-hover: #6366f1;
+  --c-accent-soft: #2a2856;
+  --c-accent-ink: #b0acf3;
+  --c-success-soft: #0f2e1c;
+  --c-success-ink: #86efac;
+  --c-warning-soft: #3a2a0a;
+  --c-warning-ink: #fcd34d;
+  --c-danger-soft: #3b1616;
+  --c-danger-ink: #fca5a5;
+  --c-coach: #2e2e33;
+  --c-coach-2: #3f3f46;
+  --c-silhouette: #2a2a2f;
+  --c-nodata: #3a3a40;
+  --sh-card: 0 0 0 1px rgb(255 255 255 / 0.04);
+  --sh-pop: 0 0 0 1px rgb(255 255 255 / 0.07), 0 16px 40px rgb(0 0 0 / 0.55);
+  --sh-raised: 0 1px 3px rgb(0 0 0 / 0.4);
+}
+
+@theme inline {
+  --font-sans: "Plus Jakarta Sans", system-ui, "Segoe UI", sans-serif;
+
+  --color-page: var(--c-page);
+  --color-surface: var(--c-surface);
+  --color-sunken: var(--c-sunken);
+  --color-inset: var(--c-inset);
+  --color-track: var(--c-track);
+  --color-selected: var(--c-selected);
+  --color-line: var(--c-line);
+  --color-popover: var(--c-popover);
+  --color-ink: var(--c-ink);
+  --color-ink-2: var(--c-ink-2);
+  --color-ink-3: var(--c-ink-3);
+  --color-muted: var(--c-muted);
+  --color-faint: var(--c-faint);
+  --color-accent: var(--c-accent);
+  --color-accent-hover: var(--c-accent-hover);
+  --color-accent-soft: var(--c-accent-soft);
+  --color-accent-ink: var(--c-accent-ink);
+  --color-success: var(--c-success);
+  --color-success-soft: var(--c-success-soft);
+  --color-success-ink: var(--c-success-ink);
+  --color-warning-soft: var(--c-warning-soft);
+  --color-warning-ink: var(--c-warning-ink);
+  --color-danger: var(--c-danger);
+  --color-danger-hover: var(--c-danger-hover);
+  --color-danger-soft: var(--c-danger-soft);
+  --color-danger-ink: var(--c-danger-ink);
+  --color-coach: var(--c-coach);
+  --color-coach-2: var(--c-coach-2);
+
+  --radius-card: 28px;
+  --radius-panel: 22px;
+  --radius-field: 16px;
+
+  --shadow-card: var(--sh-card);
+  --shadow-pop: var(--sh-pop);
+  --shadow-raised: var(--sh-raised);
 }
 
 body {
   margin: 0;
-  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+  background: var(--c-page);
+  color: var(--c-ink);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
 }
 
 @keyframes dialog-backdrop-in {

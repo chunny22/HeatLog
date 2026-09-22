@@ -1,4 +1,5 @@
 import type { DayVolume } from '../../utils/dailyActivity'
+import { ArrowDownRightIcon, ArrowUpRightIcon } from '../icons'
 
 interface ActivityStatTileProps {
   label: string
@@ -15,18 +16,36 @@ function formatDate(iso: string): string {
 }
 
 export function ActivityStatTile({ label, day, accent }: ActivityStatTileProps) {
+  const highlight = accent === 'indigo'
+  const Icon = highlight ? ArrowUpRightIcon : ArrowDownRightIcon
+
   return (
-    <div className="flex aspect-[4/3] flex-col justify-between rounded-xl border border-gray-200 bg-white p-4">
-      <span className={`text-xs font-medium ${accent === 'indigo' ? 'text-indigo-600' : 'text-gray-500'}`}>
-        {label}
-      </span>
+    <div
+      className={`flex min-h-[168px] flex-col justify-between rounded-card p-5 sm:min-h-[190px] sm:p-6 ${
+        highlight ? 'bg-accent text-white shadow-[0_8px_24px_rgb(24_24_27/0.12)]' : 'bg-surface text-ink shadow-card'
+      }`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <span className={`text-sm font-bold ${highlight ? '' : 'text-ink-2'}`}>{label}</span>
+        <span
+          className={`flex size-10 shrink-0 items-center justify-center rounded-full ${
+            highlight ? 'bg-white/20' : 'bg-sunken text-ink-3'
+          }`}
+        >
+          <Icon />
+        </span>
+      </div>
       {day ? (
         <div>
-          <p className="text-2xl font-semibold text-gray-900">{Math.round(day.volume).toLocaleString()}</p>
-          <p className="text-xs text-gray-400">vol on {formatDate(day.date)}</p>
+          <p className="text-[32px] leading-none font-extrabold tracking-tight sm:text-[40px]">
+            {Math.round(day.volume).toLocaleString()}
+          </p>
+          <p className={`mt-1.5 text-[13px] font-medium ${highlight ? 'text-white/85' : 'text-ink-3'}`}>
+            vol on {formatDate(day.date)}
+          </p>
         </div>
       ) : (
-        <p className="text-sm text-gray-400">No workouts yet</p>
+        <p className={`text-sm ${highlight ? 'text-white/85' : 'text-muted'}`}>No workouts yet</p>
       )}
     </div>
   )

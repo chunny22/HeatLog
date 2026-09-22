@@ -1,6 +1,6 @@
 export function BodySilhouette() {
   return (
-    <g fill="#f3f4f6" stroke="#e5e7eb" strokeWidth={1}>
+    <g style={{ fill: 'var(--c-silhouette)' }}>
       <circle cx="100" cy="30" r="18" />
       <rect x="90" y="46" width="20" height="14" rx="4" />
       <rect x="68" y="56" width="64" height="120" rx="16" />

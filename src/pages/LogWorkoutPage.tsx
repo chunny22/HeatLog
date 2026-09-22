@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
+import { pageClass, pageTitleClass } from '../components/ui'
 import { WorkoutForm } from '../components/workout/WorkoutForm'
 import { useSessions } from '../hooks/useSessions'
 import { todayISO } from '../utils/date'
@@ -9,8 +10,8 @@ export function LogWorkoutPage() {
   const { addSession } = useSessions()
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
-      <h1 className="mb-4 text-lg font-semibold text-gray-900">Log Workout</h1>
+    <div className={pageClass}>
+      <h1 className={pageTitleClass}>Log Workout</h1>
       <WorkoutForm
         date={date}
         onDateChange={(newDate) => setSearchParams({ date: newDate })}

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { EXERCISES_BY_ID } from '../data/exercises'
-import { SetRow } from '../components/workout/SetRow'
+import { Alert } from '../components/Alert'
+import { btnPrimaryClass, cardClass, cardTitleClass, pageClass, pageTitleClass } from '../components/ui'
+import { SetRow, SetRowHeader } from '../components/workout/SetRow'
 import { useSessions } from '../hooks/useSessions'
 import type { SetEntry, WorkoutEntry } from '../types'
 
@@ -37,54 +39,49 @@ export function CompleteWorkoutPage() {
   }
 
   if (loading) {
-    return <div className="mx-auto max-w-3xl px-4 py-6 text-sm text-gray-400">Loading…</div>
+    return <div className={`${pageClass} text-sm text-muted`}>Loading…</div>
   }
 
   if (!session) {
-    return <div className="mx-auto max-w-3xl px-4 py-6 text-sm text-gray-400">Workout not found.</div>
+    return <div className={`${pageClass} text-sm text-muted`}>Workout not found.</div>
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
-      <h1 className="mb-1 text-lg font-semibold text-gray-900">Mark Workout Done</h1>
-      <p className="mb-4 text-sm text-gray-500">
-        {session.date} — adjust reps/weight if it differed from the plan, and fill in how hard each set felt (RPE).
-      </p>
-
-      <div className="flex flex-col gap-3">
-        {entries.map((entry) => {
-          const exercise = EXERCISES_BY_ID[entry.exerciseId]
-          return (
-            <div key={entry.exerciseId} className="rounded-xl border border-gray-200 p-3">
-              <h4 className="mb-2 text-sm font-semibold text-gray-900">{exercise?.name}</h4>
-              <div className="flex flex-col gap-2">
-                {entry.sets.map((set, i) => (
-                  <SetRow
-                    key={i}
-                    index={i}
-                    set={set}
-                    showIntensity
-                    onChange={(updated) => {
-                      const sets = [...entry.sets]
-                      sets[i] = updated
-                      updateSets(entry.exerciseId, sets)
-                    }}
-                    onRemove={() => updateSets(entry.exerciseId, entry.sets.filter((_, si) => si !== i))}
-                  />
-                ))}
-              </div>
-            </div>
-          )
-        })}
+    <div className={pageClass}>
+      <div className="flex flex-col gap-1.5">
+        <h1 className={pageTitleClass}>Mark Workout Done</h1>
+        <p className="text-[15px] text-ink-3">
+          {session.date} — adjust reps/weight if it differed from the plan, and fill in how hard each set felt (RPE).
+        </p>
       </div>
 
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      {entries.map((entry) => {
+        const exercise = EXERCISES_BY_ID[entry.exerciseId]
+        return (
+          <section key={entry.exerciseId} className={`${cardClass} flex flex-col gap-3.5`}>
+            <h2 className={cardTitleClass}>{exercise?.name}</h2>
+            <SetRowHeader showIntensity />
+            {entry.sets.map((set, i) => (
+              <SetRow
+                key={i}
+                index={i}
+                set={set}
+                showIntensity
+                onChange={(updated) => {
+                  const sets = [...entry.sets]
+                  sets[i] = updated
+                  updateSets(entry.exerciseId, sets)
+                }}
+                onRemove={() => updateSets(entry.exerciseId, entry.sets.filter((_, si) => si !== i))}
+              />
+            ))}
+          </section>
+        )
+      })}
 
-      <button
-        onClick={handleComplete}
-        disabled={saving}
-        className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
-      >
+      {error && <Alert tone="error">{error}</Alert>}
+
+      <button onClick={handleComplete} disabled={saving} className={`${btnPrimaryClass} h-[54px] text-base`}>
         {saving ? 'Saving…' : 'Mark as completed'}
       </button>
     </div>
