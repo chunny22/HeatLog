@@ -1,8 +1,20 @@
 import { useState } from 'react'
 import { EXERCISES_BY_ID } from '../../data/exercises'
 import type { Exercise, SetEntry, WorkoutEntry, WorkoutStatus } from '../../types'
+import { Alert } from '../Alert'
+import { CalendarIcon, PlusIcon, TrashIcon } from '../icons'
+import {
+  btnPrimaryClass,
+  btnSoftSmClass,
+  cardClass,
+  cardTitleClass,
+  iconBtnDangerClass,
+  labelClass,
+  segmentClass,
+  segmentedClass,
+} from '../ui'
 import { ExercisePicker } from './ExercisePicker'
-import { SetRow } from './SetRow'
+import { SetRow, SetRowHeader } from './SetRow'
 
 const DEFAULT_SET: SetEntry = { reps: 0, weight: 0, unit: 'lb' }
 
@@ -59,104 +71,99 @@ export function WorkoutForm({ date, onDateChange, onSave }: WorkoutFormProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <label className="flex flex-col gap-1 text-sm text-gray-700">
-        Date
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => onDateChange(e.target.value)}
-          className="w-fit rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-indigo-500"
-        />
-      </label>
+    <div className="flex flex-col gap-5">
+      <section className={`${cardClass} flex flex-wrap items-end justify-between gap-4`}>
+        <label className={labelClass}>
+          Date
+          <span className="flex h-12 items-center gap-2.5 rounded-field bg-inset px-4 text-ink-3 transition-shadow focus-within:bg-surface focus-within:ring-2 focus-within:ring-accent">
+            <CalendarIcon />
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => onDateChange(e.target.value)}
+              className="bg-transparent text-[15px] font-semibold text-ink outline-none"
+            />
+          </span>
+        </label>
 
-      <div className="flex gap-1">
-        <button
-          onClick={() => setStatus('planned')}
-          className={`rounded-full px-3 py-1.5 text-xs font-medium ${
-            status === 'planned' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600'
-          }`}
-        >
-          Plan for later
-        </button>
-        <button
-          onClick={() => setStatus('completed')}
-          className={`rounded-full px-3 py-1.5 text-xs font-medium ${
-            status === 'completed' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600'
-          }`}
-        >
-          Log as done
-        </button>
-      </div>
+        <div role="group" aria-label="Workout status" className={segmentedClass}>
+          <button onClick={() => setStatus('planned')} aria-pressed={status === 'planned'} className={segmentClass(status === 'planned')}>
+            Plan for later
+          </button>
+          <button
+            onClick={() => setStatus('completed')}
+            aria-pressed={status === 'completed'}
+            className={segmentClass(status === 'completed')}
+          >
+            Log as done
+          </button>
+        </div>
+      </section>
 
-      <ExercisePicker onAdd={addExercise} />
+      {saved && <Alert tone="success">{status === 'planned' ? 'Plan saved.' : 'Workout saved.'}</Alert>}
 
-      <div className="flex flex-col gap-3">
-        {entries.map((entry) => {
-          const exercise = EXERCISES_BY_ID[entry.exerciseId]
-          return (
-            <div key={entry.exerciseId} className="rounded-xl border border-gray-200 p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <h4 className="text-sm font-semibold text-gray-900">{exercise?.name}</h4>
-                <button
-                  onClick={() => removeExercise(entry.exerciseId)}
-                  className="text-xs text-red-500 hover:underline"
-                >
-                  Remove exercise
-                </button>
-              </div>
-              <div className="flex flex-col gap-2">
-                {entry.sets.map((set, i) => (
-                  <SetRow
-                    key={i}
-                    index={i}
-                    set={set}
-                    showIntensity={status === 'completed'}
-                    onChange={(updated) => {
-                      const sets = [...entry.sets]
-                      sets[i] = updated
-                      updateSets(entry.exerciseId, sets)
-                    }}
-                    onRemove={() => updateSets(entry.exerciseId, entry.sets.filter((_, si) => si !== i))}
-                  />
-                ))}
-              </div>
+      <ExercisePicker onAdd={addExercise} addedIds={entries.map((e) => e.exerciseId)} />
+
+      {entries.map((entry) => {
+        const exercise = EXERCISES_BY_ID[entry.exerciseId]
+        return (
+          <section key={entry.exerciseId} className={`${cardClass} flex flex-col gap-3.5`}>
+            <div className="flex items-center justify-between gap-3">
+              <h3 className={cardTitleClass}>{exercise?.name}</h3>
               <button
-                onClick={() => updateSets(entry.exerciseId, [...entry.sets, { ...DEFAULT_SET }])}
-                className="mt-2 text-xs font-medium text-indigo-600 hover:underline"
+                onClick={() => removeExercise(entry.exerciseId)}
+                aria-label={`Remove ${exercise?.name ?? 'exercise'}`}
+                title="Remove exercise"
+                className={iconBtnDangerClass}
               >
-                + Add set
+                <TrashIcon size={17} />
               </button>
             </div>
-          )
-        })}
-      </div>
+            <SetRowHeader showIntensity={status === 'completed'} />
+            {entry.sets.map((set, i) => (
+              <SetRow
+                key={i}
+                index={i}
+                set={set}
+                showIntensity={status === 'completed'}
+                onChange={(updated) => {
+                  const sets = [...entry.sets]
+                  sets[i] = updated
+                  updateSets(entry.exerciseId, sets)
+                }}
+                onRemove={() => updateSets(entry.exerciseId, entry.sets.filter((_, si) => si !== i))}
+              />
+            ))}
+            <button
+              onClick={() => updateSets(entry.exerciseId, [...entry.sets, { ...DEFAULT_SET }])}
+              className={`${btnSoftSmClass} self-start pl-3`}
+            >
+              <PlusIcon size={16} />
+              Add set
+            </button>
+          </section>
+        )
+      })}
 
       {entries.length > 0 && (
-        <>
-          <label className="flex flex-col gap-1 text-sm text-gray-700">
+        <section className={`${cardClass} flex flex-col gap-4`}>
+          <label className={labelClass}>
             Notes (optional)
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-indigo-500"
+              placeholder="How did it feel?"
+              className="resize-none rounded-[18px] bg-inset px-4 py-3.5 text-[15px] font-medium text-ink outline-none transition-shadow placeholder:font-normal placeholder:text-muted focus:bg-surface focus:ring-2 focus:ring-accent"
             />
           </label>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          {saved && (
-            <p className="text-sm text-green-600">{status === 'planned' ? 'Plan saved.' : 'Workout saved.'}</p>
-          )}
+          {error && <Alert tone="error">{error}</Alert>}
 
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
-          >
+          <button onClick={handleSave} disabled={saving} className={`${btnPrimaryClass} h-[54px] text-base`}>
             {saving ? 'Saving…' : status === 'planned' ? 'Save plan' : 'Save workout'}
           </button>
-        </>
+        </section>
       )}
     </div>
   )
