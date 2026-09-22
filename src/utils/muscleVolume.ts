@@ -4,7 +4,7 @@ import type { MuscleGroup, WorkoutSession } from '../types'
 
 const SECONDARY_WEIGHT = 0.5
 
-function setVolume(reps: number, weight: number): number {
+export function setVolume(reps: number, weight: number): number {
   return reps * (weight > 0 ? weight : 1)
 }
 

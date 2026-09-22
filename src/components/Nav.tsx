@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthContext'
 const links = [
   { to: '/', label: 'Calendar' },
   { to: '/log', label: 'Log Workout' },
-  { to: '/history', label: 'History' },
+  { to: '/breakdown', label: 'Breakdown' },
 ]
 
 export function Nav() {

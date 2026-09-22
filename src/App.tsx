@@ -5,10 +5,10 @@ import { RequireAdmin } from './auth/RequireAdmin'
 import { RequireAuth } from './auth/RequireAuth'
 import { Nav } from './components/Nav'
 import { AdminPage } from './pages/AdminPage'
+import { BreakdownPage } from './pages/BreakdownPage'
 import { CalendarPage } from './pages/CalendarPage'
 import { CompleteWorkoutPage } from './pages/CompleteWorkoutPage'
 import { DayDetailPage } from './pages/DayDetailPage'
-import { HistoryPage } from './pages/HistoryPage'
 import { LogWorkoutPage } from './pages/LogWorkoutPage'
 
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -45,11 +45,11 @@ export default function App() {
         }
       />
       <Route
-        path="/history"
+        path="/breakdown"
         element={
           <RequireAuth>
             <AppLayout>
-              <HistoryPage />
+              <BreakdownPage />
             </AppLayout>
           </RequireAuth>
         }
