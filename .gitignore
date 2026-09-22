@@ -15,6 +15,10 @@ dist-ssr
 # Supabase CLI local project-link cache (contains connection details)
 supabase/.temp
 
+# Personal scratch files (test credentials, todo notes) -- not part of the app
+src/assets/testing.txt
+src/assets/todo-list.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

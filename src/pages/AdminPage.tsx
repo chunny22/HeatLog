@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../auth/AuthContext'
+import { useConfirm } from '../hooks/useConfirm'
 import { supabase } from '../supabase'
 
 interface AdminUser {
@@ -14,6 +15,7 @@ export function AdminPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const { confirm, dialog } = useConfirm()
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -34,7 +36,7 @@ export function AdminPage() {
   }, [refresh])
 
   const handleDelete = async (user: AdminUser) => {
-    if (!window.confirm(`Permanently delete ${user.email}? This cannot be undone.`)) return
+    if (!(await confirm(`Permanently delete ${user.email}? This cannot be undone.`))) return
 
     setDeletingId(user.id)
     const { data, error } = await supabase.functions.invoke('admin-delete-user', {
@@ -94,6 +96,7 @@ export function AdminPage() {
           </table>
         </div>
       )}
+      {dialog}
     </div>
   )
 }

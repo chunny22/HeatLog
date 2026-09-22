@@ -8,3 +8,59 @@ body {
   margin: 0;
   font-family: system-ui, "Segoe UI", Roboto, sans-serif;
 }
+
+@keyframes dialog-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialog-card-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes dialog-backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-card-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(4px);
+  }
+}
+
+.dialog-backdrop-enter {
+  animation: dialog-backdrop-in 150ms ease-out;
+}
+
+.dialog-card-enter {
+  animation: dialog-card-in 150ms ease-out;
+}
+
+.dialog-backdrop-exit {
+  animation: dialog-backdrop-out 150ms ease-in forwards;
+}
+
+.dialog-card-exit {
+  animation: dialog-card-out 150ms ease-in forwards;
+}

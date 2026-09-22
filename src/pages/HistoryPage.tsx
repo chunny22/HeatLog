@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { EXERCISES_BY_ID } from '../data/exercises'
+import { useConfirm } from '../hooks/useConfirm'
 import { useSessions } from '../hooks/useSessions'
 import type { WorkoutSession } from '../types'
 
@@ -10,6 +11,7 @@ function formatSet(set: WorkoutSession['entries'][number]['sets'][number]) {
 
 export function HistoryPage() {
   const { sessions, loading, error, deleteSession } = useSessions()
+  const { confirm, dialog } = useConfirm()
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
@@ -41,7 +43,14 @@ export function HistoryPage() {
                   </Link>
                 )}
                 <button
-                  onClick={() => deleteSession(session.id)}
+                  onClick={async () => {
+                    const names = session.entries
+                      .map((e) => EXERCISES_BY_ID[e.exerciseId]?.name ?? e.exerciseId)
+                      .join(', ')
+                    if (await confirm(`Delete this workout (${names || session.date})? This cannot be undone.`)) {
+                      deleteSession(session.id)
+                    }
+                  }}
                   className="text-xs text-red-500 hover:underline"
                 >
                   Delete
@@ -66,6 +75,7 @@ export function HistoryPage() {
           </div>
         ))}
       </div>
+      {dialog}
     </div>
   )
 }

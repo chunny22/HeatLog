@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { EXERCISES_BY_ID } from '../../data/exercises'
+import { useConfirm } from '../../hooks/useConfirm'
 import type { WorkoutSession } from '../../types'
 
 interface DayDetailPanelProps {
@@ -14,6 +15,8 @@ function formatSet(set: WorkoutSession['entries'][number]['sets'][number]) {
 }
 
 export function DayDetailPanel({ date, sessions, onDeleteSession }: DayDetailPanelProps) {
+  const { confirm, dialog } = useConfirm()
+
   return (
     <div className="mt-4 rounded-xl border border-gray-200 p-4">
       <div className="mb-3 flex items-center justify-between">
@@ -48,7 +51,17 @@ export function DayDetailPanel({ date, sessions, onDeleteSession }: DayDetailPan
                     Mark as done
                   </Link>
                 )}
-                <button onClick={() => onDeleteSession(session.id)} className="text-xs text-red-500 hover:underline">
+                <button
+                  onClick={async () => {
+                    const names = session.entries
+                      .map((e) => EXERCISES_BY_ID[e.exerciseId]?.name ?? e.exerciseId)
+                      .join(', ')
+                    if (await confirm(`Delete this workout (${names || date})? This cannot be undone.`)) {
+                      onDeleteSession(session.id)
+                    }
+                  }}
+                  className="text-xs text-red-500 hover:underline"
+                >
                   Delete
                 </button>
               </div>
@@ -70,6 +83,7 @@ export function DayDetailPanel({ date, sessions, onDeleteSession }: DayDetailPan
           </div>
         ))}
       </div>
+      {dialog}
     </div>
   )
 }
