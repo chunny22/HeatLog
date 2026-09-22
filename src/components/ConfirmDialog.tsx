@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { TrashIcon } from './icons'
+import { btnDangerClass, btnSecondaryClass } from './ui'
 
 interface ConfirmDialogProps {
   message: string
@@ -44,7 +46,7 @@ export function ConfirmDialog({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 ${
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/45 px-4 dark:bg-black/65 ${
         closing ? 'dialog-backdrop-exit' : 'dialog-backdrop-enter'
       }`}
       onClick={() => close('cancel')}
@@ -52,27 +54,24 @@ export function ConfirmDialog({
       <div
         role="alertdialog"
         aria-modal="true"
-        className={`w-full max-w-sm rounded-xl border border-gray-200 bg-white p-5 shadow-lg ${
+        aria-describedby="confirm-dialog-message"
+        className={`flex w-full max-w-[400px] flex-col items-center gap-4 rounded-card bg-surface p-7 text-center shadow-pop ${
           closing ? 'dialog-card-exit' : 'dialog-card-enter'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="text-sm text-gray-700">{message}</p>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => close('confirm')}
-            autoFocus
-            className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
-          >
-            {confirmLabel}
-          </button>
-          <button
-            type="button"
-            onClick={() => close('cancel')}
-            className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100"
-          >
+        <span className="flex size-14 items-center justify-center rounded-full bg-danger-soft text-danger">
+          <TrashIcon size={24} />
+        </span>
+        <p id="confirm-dialog-message" className="text-[15px] leading-[22px] font-medium text-ink-2">
+          {message}
+        </p>
+        <div className="mt-1 grid w-full grid-cols-2 gap-2.5">
+          <button type="button" onClick={() => close('cancel')} className={btnSecondaryClass}>
             {cancelLabel}
+          </button>
+          <button type="button" onClick={() => close('confirm')} autoFocus className={btnDangerClass}>
+            {confirmLabel}
           </button>
         </div>
       </div>

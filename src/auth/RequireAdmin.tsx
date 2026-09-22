@@ -6,7 +6,7 @@ export function RequireAdmin({ children }: { children: ReactNode }) {
   const { session, loading } = useAuth()
 
   if (loading) {
-    return <div className="flex h-screen items-center justify-center text-gray-500">Loading…</div>
+    return <div className="flex h-screen items-center justify-center bg-page text-sm font-medium text-muted">Loading…</div>
   }
 
   if (!session || session.user.email !== import.meta.env.VITE_ADMIN_EMAIL) {

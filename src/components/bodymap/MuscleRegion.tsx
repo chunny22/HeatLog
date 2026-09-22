@@ -25,9 +25,9 @@ export function MuscleRegion({ shape, normalizedVolume, rawVolume }: MuscleRegio
         y={shape.y}
         width={shape.width}
         height={shape.height}
-        rx={shape.rx ?? 6}
-        fill={muscleColor(normalizedVolume)}
-        stroke="#ffffff"
+        rx={shape.rx ?? Math.min(shape.width, shape.height) / 2}
+        // style (not attributes) so the colours can be theme CSS variables
+        style={{ fill: muscleColor(normalizedVolume), stroke: 'var(--c-inset)' }}
         strokeWidth={1.5}
       >
         <title>

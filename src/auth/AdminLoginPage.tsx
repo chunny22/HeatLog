@@ -1,5 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import { Alert } from '../components/Alert'
+import { LockIcon } from '../components/icons'
+import { btnPrimaryClass, fieldClass, labelClass } from '../components/ui'
 import { useAuth } from './AuthContext'
 
 export function AdminLoginPage() {
@@ -29,31 +32,35 @@ export function AdminLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h1 className="mb-1 text-xl font-semibold text-gray-900">Admin</h1>
-        <p className="mb-6 text-sm text-gray-500">Enter the admin password to continue.</p>
+    <div className="flex min-h-screen items-center justify-center bg-page px-4 py-12">
+      <div className="flex w-full max-w-[420px] flex-col gap-6 rounded-[32px] bg-surface p-6 shadow-card sm:p-9">
+        <div className="flex flex-col items-center gap-3.5 text-center">
+          <span className="flex size-[60px] items-center justify-center rounded-full bg-ink text-page">
+            <LockIcon size={24} />
+          </span>
+          <div>
+            <h1 className="mb-1.5 text-[26px] font-extrabold tracking-tight text-ink">Admin</h1>
+            <p className="text-sm text-ink-3">Enter the admin password to continue.</p>
+          </div>
+        </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <label className="flex flex-col gap-1 text-sm text-gray-700">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+          <label className={labelClass}>
             Password
             <input
               type="password"
               required
               autoFocus
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-indigo-500"
+              className={fieldClass}
             />
           </label>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <Alert tone="error">{error}</Alert>}
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="mt-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
-          >
+          <button type="submit" disabled={submitting} className={`${btnPrimaryClass} mt-2.5 h-[54px] text-base`}>
             {submitting ? 'Signing in…' : 'Sign in'}
           </button>
         </form>

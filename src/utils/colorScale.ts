@@ -4,7 +4,8 @@ const STOPS: [number, [number, number, number]][] = [
   [1, [220, 38, 38]], // red-600
 ]
 
-const NO_DATA_COLOR = '#e5e7eb' // gray-200
+// Follows the light/dark theme; see --c-nodata in index.css.
+const NO_DATA_COLOR = 'var(--c-nodata)'
 
 export function muscleColor(normalizedVolume: number): string {
   if (!normalizedVolume || normalizedVolume <= 0) return NO_DATA_COLOR

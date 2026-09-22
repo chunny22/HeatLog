@@ -1,5 +1,8 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { DumbbellIcon, LogOutIcon } from './icons'
+import { ThemeMenu } from './ThemeMenu'
+import { iconBtnClass } from './ui'
 
 const links = [
   { to: '/', label: 'Calendar' },
@@ -7,47 +10,41 @@ const links = [
   { to: '/breakdown', label: 'Breakdown' },
 ]
 
+const linkClass = ({ isActive }: { isActive: boolean }) =>
+  `flex h-11 shrink-0 items-center whitespace-nowrap rounded-full px-3.5 text-sm font-semibold transition-colors sm:px-[18px] ${
+    isActive ? 'bg-accent text-white' : 'text-ink-3 hover:bg-sunken hover:text-ink'
+  }`
+
 export function Nav() {
   const { session, signOut } = useAuth()
   const isAdmin = session?.user.email === import.meta.env.VITE_ADMIN_EMAIL
 
   return (
-    <nav className="sticky top-0 z-10 border-b border-gray-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 overflow-x-auto px-4 py-3">
-        <div className="flex gap-1">
-          {links.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              end={link.to === '/'}
-              className={({ isActive }) =>
-                `whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                  isActive ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'
-                }`
-              }
-            >
-              {link.label}
-            </NavLink>
-          ))}
-          {isAdmin && (
-            <NavLink
-              to="/admin"
-              className={({ isActive }) =>
-                `whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                  isActive ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'
-                }`
-              }
-            >
-              Admin
-            </NavLink>
-          )}
+    <nav className="sticky top-0 z-30 px-4 pt-4 pb-2">
+      <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 rounded-full bg-surface/95 p-2 shadow-card backdrop-blur">
+        <div className="flex min-w-0 items-center gap-1">
+          <span className="mr-2 hidden size-11 shrink-0 items-center justify-center rounded-full bg-accent text-white sm:flex">
+            <DumbbellIcon size={20} />
+          </span>
+          <div className="flex min-w-0 gap-1 overflow-x-auto">
+            {links.map((link) => (
+              <NavLink key={link.to} to={link.to} end={link.to === '/'} className={linkClass}>
+                {link.label}
+              </NavLink>
+            ))}
+            {isAdmin && (
+              <NavLink to="/admin" className={linkClass}>
+                Admin
+              </NavLink>
+            )}
+          </div>
         </div>
-        <button
-          onClick={signOut}
-          className="whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100"
-        >
-          Sign out
-        </button>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <ThemeMenu />
+          <button onClick={signOut} aria-label="Sign out" title="Sign out" className={iconBtnClass}>
+            <LogOutIcon />
+          </button>
+        </div>
       </div>
     </nav>
   )
