@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import { Alert } from '../components/Alert'
 import { CheckIcon, DumbbellIcon } from '../components/icons'
@@ -6,6 +6,12 @@ import { btnPrimaryClass, chipClass, fieldClass, labelClass, segmentClass, segme
 import { GOALS } from '../data/goals'
 import type { FitnessGoal, HeightUnit, WeightUnit } from '../types'
 import { useAuth } from './AuthContext'
+
+// How long the fields stay dimmed before swapping, and how long the card
+// then takes to resize to its new height -- kept in sync with the CSS
+// transition durations below so the dim, swap and resize all land together.
+const SWAP_DELAY_MS = 150
+const RESIZE_MS = 300
 
 // A number field with a small unit toggle (lb/kg, in/cm) inside it.
 function MeasureField<U extends string>({
@@ -58,7 +64,15 @@ function MeasureField<U extends string>({
 
 export function AuthPage() {
   const { session, signIn, signUp } = useAuth()
+
+  // `activeTab` reflects the clicked tab instantly. `mode` is what's actually
+  // rendered (title, fields, submit label) and lags behind it by
+  // SWAP_DELAY_MS, so the field swap happens once the fields have faded out
+  // rather than popping while still visible.
+  const [activeTab, setActiveTab] = useState<'sign-in' | 'sign-up'>('sign-in')
   const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in')
+  const [dimmed, setDimmed] = useState(false)
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
@@ -71,14 +85,68 @@ export function AuthPage() {
   const [message, setMessage] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
+  const cardRef = useRef<HTMLDivElement>(null)
+  const pendingResizeRef = useRef(false)
+  const timersRef = useRef<number[]>([])
+
+  useLayoutEffect(() => {
+    const timers = timersRef.current
+    return () => {
+      timers.forEach(clearTimeout)
+    }
+  }, [])
+
+  // Runs once the fields underneath have actually swapped: measure the
+  // card's new natural height and animate to it, then undim partway through
+  // so the reveal feels responsive rather than waiting out the full resize.
+  useLayoutEffect(() => {
+    if (!pendingResizeRef.current) return
+    const card = cardRef.current
+    if (!card) return
+
+    // scrollHeight can't be used here: it never reports less than the box's own
+    // (still locked) height, so shrinking would measure as "no change". Briefly
+    // release the height to read the true content height, then restore it.
+    const startHeight = card.getBoundingClientRect().height
+    card.style.height = 'auto'
+    const targetHeight = card.getBoundingClientRect().height
+    card.style.height = `${startHeight}px`
+    void card.offsetHeight
+
+    const raf = requestAnimationFrame(() => {
+      card.style.height = `${targetHeight}px`
+
+      const undim = window.setTimeout(() => setDimmed(false), SWAP_DELAY_MS)
+      const settle = window.setTimeout(() => {
+        if (cardRef.current) cardRef.current.style.height = 'auto'
+        pendingResizeRef.current = false
+      }, RESIZE_MS)
+      timersRef.current.push(undim, settle)
+    })
+
+    return () => cancelAnimationFrame(raf)
+  }, [mode])
+
   if (session) {
     return <Navigate to="/" replace />
   }
 
   const switchMode = (next: 'sign-in' | 'sign-up') => {
-    setMode(next)
+    if (next === activeTab || pendingResizeRef.current) return
+
+    setActiveTab(next)
     setError(null)
     setMessage(null)
+
+    const card = cardRef.current
+    if (card) {
+      card.style.height = `${card.getBoundingClientRect().height}px`
+    }
+    pendingResizeRef.current = true
+    setDimmed(true)
+
+    const swap = window.setTimeout(() => setMode(next), SWAP_DELAY_MS)
+    timersRef.current.push(swap)
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -116,9 +184,8 @@ export function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-page px-4 py-12">
       <div
-        className={`flex w-full flex-col gap-6 rounded-[32px] bg-surface p-6 shadow-card sm:p-9 ${
-          mode === 'sign-up' ? 'max-w-[480px]' : 'max-w-[420px]'
-        }`}
+        ref={cardRef}
+        className="flex w-full max-w-[480px] flex-col gap-6 overflow-hidden rounded-[32px] bg-surface p-6 shadow-card transition-[height] duration-300 ease-out sm:p-9"
       >
         <div className="flex flex-col items-center gap-3.5 text-center">
           <span className="flex size-[60px] items-center justify-center rounded-full bg-accent text-white">
@@ -136,110 +203,116 @@ export function AuthPage() {
           <button
             type="button"
             role="tab"
-            aria-selected={mode === 'sign-in'}
+            aria-selected={activeTab === 'sign-in'}
             onClick={() => switchMode('sign-in')}
-            className={`${segmentClass(mode === 'sign-in')} h-11`}
+            className={`${segmentClass(activeTab === 'sign-in')} h-11`}
           >
             Sign in
           </button>
           <button
             type="button"
             role="tab"
-            aria-selected={mode === 'sign-up'}
+            aria-selected={activeTab === 'sign-up'}
             onClick={() => switchMode('sign-up')}
-            className={`${segmentClass(mode === 'sign-up')} h-11`}
+            className={`${segmentClass(activeTab === 'sign-up')} h-11`}
           >
             Create account
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-          <label className={labelClass}>
-            Email
-            <input
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={fieldClass}
-            />
-          </label>
-          <label className={labelClass}>
-            Password
-            <input
-              type="password"
-              required
-              minLength={6}
-              autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={fieldClass}
-            />
-          </label>
+          <div
+            className={`flex flex-col gap-3.5 transition-opacity duration-150 ease-out ${
+              dimmed ? 'pointer-events-none opacity-40' : 'opacity-100'
+            }`}
+          >
+            <label className={labelClass}>
+              Email
+              <input
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={fieldClass}
+              />
+            </label>
+            <label className={labelClass}>
+              Password
+              <input
+                type="password"
+                required
+                minLength={6}
+                autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={fieldClass}
+              />
+            </label>
 
-          {mode === 'sign-up' && (
-            <>
-              <label className={labelClass}>
-                Name
-                <input
-                  type="text"
-                  required
-                  autoComplete="name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className={fieldClass}
-                />
-              </label>
+            {mode === 'sign-up' && (
+              <div className="flex animate-auth-extra-in flex-col gap-3.5">
+                <label className={labelClass}>
+                  Name
+                  <input
+                    type="text"
+                    required
+                    autoComplete="name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className={fieldClass}
+                  />
+                </label>
 
-              <div className="grid grid-cols-2 gap-3">
-                <MeasureField
-                  label="Weight"
-                  value={weight}
-                  onValueChange={setWeight}
-                  unit={weightUnit}
-                  units={['lb', 'kg']}
-                  onUnitChange={setWeightUnit}
-                />
-                <MeasureField
-                  label="Height"
-                  value={height}
-                  onValueChange={setHeight}
-                  unit={heightUnit}
-                  units={['in', 'cm']}
-                  onUnitChange={setHeightUnit}
-                />
-              </div>
-
-              <fieldset className="mt-2.5 flex flex-col gap-2.5">
-                <legend className="mb-2.5 text-[13px] font-bold text-ink-2">
-                  Your goals <span className="font-medium text-ink-3">· pick all that apply</span>
-                </legend>
-                <div className="flex flex-wrap gap-2">
-                  {GOALS.map((option) => {
-                    const selected = goals.includes(option.id)
-                    return (
-                      <button
-                        key={option.id}
-                        type="button"
-                        title={option.description}
-                        aria-pressed={selected}
-                        onClick={() =>
-                          setGoals((prev) =>
-                            prev.includes(option.id) ? prev.filter((g) => g !== option.id) : [...prev, option.id],
-                          )
-                        }
-                        className={`${chipClass(selected)} ${selected ? 'pl-3' : ''}`}
-                      >
-                        {selected && <CheckIcon size={15} strokeWidth={2.5} />}
-                        {option.label}
-                      </button>
-                    )
-                  })}
+                <div className="grid grid-cols-2 gap-3">
+                  <MeasureField
+                    label="Weight"
+                    value={weight}
+                    onValueChange={setWeight}
+                    unit={weightUnit}
+                    units={['lb', 'kg']}
+                    onUnitChange={setWeightUnit}
+                  />
+                  <MeasureField
+                    label="Height"
+                    value={height}
+                    onValueChange={setHeight}
+                    unit={heightUnit}
+                    units={['in', 'cm']}
+                    onUnitChange={setHeightUnit}
+                  />
                 </div>
-              </fieldset>
-            </>
-          )}
+
+                <fieldset className="mt-2.5 flex flex-col gap-2.5">
+                  <legend className="mb-2.5 text-[13px] font-bold text-ink-2">
+                    Your goals <span className="font-medium text-ink-3">· pick all that apply</span>
+                  </legend>
+                  <div className="flex flex-wrap gap-2">
+                    {GOALS.map((option) => {
+                      const selected = goals.includes(option.id)
+                      return (
+                        <button
+                          key={option.id}
+                          type="button"
+                          title={option.description}
+                          aria-pressed={selected}
+                          onClick={() =>
+                            setGoals((prev) =>
+                              prev.includes(option.id) ? prev.filter((g) => g !== option.id) : [...prev, option.id],
+                            )
+                          }
+                          className={`${chipClass(selected)} ${selected ? 'pl-3' : ''}`}
+                        >
+                          {selected && <CheckIcon size={15} strokeWidth={2.5} />}
+                          {option.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </fieldset>
+              </div>
+            )}
+          </div>
 
           {error && <Alert tone="error">{error}</Alert>}
           {message && <Alert tone="success">{message}</Alert>}
