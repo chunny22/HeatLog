@@ -50,6 +50,11 @@ export const ArrowLeftIcon = (p: IconProps) => (
     <path d="M19 12H5M12 19l-7-7 7-7" />
   </Icon>
 )
+export const ArrowRightIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M5 12h14M12 5l7 7-7 7" />
+  </Icon>
+)
 export const ArrowUpRightIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="M7 17L17 7M9 7h8v8" />

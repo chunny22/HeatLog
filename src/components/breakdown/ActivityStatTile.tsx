@@ -1,5 +1,6 @@
+import { Link } from 'react-router-dom'
 import type { DayVolume } from '../../utils/dailyActivity'
-import { ArrowDownRightIcon, ArrowUpRightIcon } from '../icons'
+import { ArrowRightIcon } from '../icons'
 
 interface ActivityStatTileProps {
   label: string
@@ -17,7 +18,10 @@ function formatDate(iso: string): string {
 
 export function ActivityStatTile({ label, day, accent }: ActivityStatTileProps) {
   const highlight = accent === 'indigo'
-  const Icon = highlight ? ArrowUpRightIcon : ArrowDownRightIcon
+
+  const badgeClass = `flex size-10 shrink-0 items-center justify-center rounded-full transition-colors ${
+    highlight ? 'bg-white/20' : 'bg-sunken text-ink-3'
+  }`
 
   return (
     <div
@@ -27,13 +31,19 @@ export function ActivityStatTile({ label, day, accent }: ActivityStatTileProps) 
     >
       <div className="flex items-start justify-between gap-2">
         <span className={`text-sm font-bold ${highlight ? '' : 'text-ink-2'}`}>{label}</span>
-        <span
-          className={`flex size-10 shrink-0 items-center justify-center rounded-full ${
-            highlight ? 'bg-white/20' : 'bg-sunken text-ink-3'
-          }`}
-        >
-          <Icon />
-        </span>
+        {day ? (
+          <Link
+            to={`/day/${day.date}`}
+            aria-label={`${label}: view ${formatDate(day.date)}`}
+            className={`${badgeClass} ${highlight ? 'hover:bg-white/30' : 'hover:bg-line'}`}
+          >
+            <ArrowRightIcon />
+          </Link>
+        ) : (
+          <span className={badgeClass}>
+            <ArrowRightIcon />
+          </span>
+        )}
       </div>
       {day ? (
         <div>
