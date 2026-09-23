@@ -150,3 +150,24 @@ create policy "Users manage their own day insights"
   for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- Body-weight history for the progress chart. One weigh-in per user per day
+-- (logging again on the same day replaces it). Same value+unit pattern as
+-- profiles / workout sets.
+create table if not exists weight_logs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users on delete cascade,
+  date date not null,
+  weight numeric not null check (weight > 0),
+  unit text not null check (unit in ('lb', 'kg')),
+  unique (user_id, date)
+);
+
+alter table weight_logs enable row level security;
+
+drop policy if exists "Users manage their own weight logs" on weight_logs;
+create policy "Users manage their own weight logs"
+  on weight_logs
+  for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);

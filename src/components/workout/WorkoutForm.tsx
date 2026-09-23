@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { EXERCISES_BY_ID } from '../../data/exercises'
-import type { Exercise, SetEntry, WorkoutEntry, WorkoutStatus } from '../../types'
+import type { Exercise, SetEntry, WorkoutEntry, WorkoutSession, WorkoutStatus } from '../../types'
 import { Alert } from '../Alert'
 import { CalendarIcon, PlusIcon, TrashIcon } from '../icons'
 import {
@@ -14,17 +14,19 @@ import {
   segmentedClass,
 } from '../ui'
 import { ExercisePicker } from './ExercisePicker'
+import { LastTimeHint } from './LastTimeHint'
 import { SetRow, SetRowHeader } from './SetRow'
 
 const DEFAULT_SET: SetEntry = { reps: 0, weight: 0, unit: 'lb' }
 
 interface WorkoutFormProps {
   date: string
+  sessions: WorkoutSession[]
   onDateChange: (date: string) => void
   onSave: (entries: WorkoutEntry[], status: WorkoutStatus, notes?: string) => Promise<{ error: string | null }>
 }
 
-export function WorkoutForm({ date, onDateChange, onSave }: WorkoutFormProps) {
+export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFormProps) {
   const [status, setStatus] = useState<WorkoutStatus>('planned')
   const [entries, setEntries] = useState<WorkoutEntry[]>([])
   const [notes, setNotes] = useState('')
@@ -119,6 +121,12 @@ export function WorkoutForm({ date, onDateChange, onSave }: WorkoutFormProps) {
                 <TrashIcon size={17} />
               </button>
             </div>
+            <LastTimeHint
+              sessions={sessions}
+              exerciseId={entry.exerciseId}
+              date={date}
+              onUse={(sets) => updateSets(entry.exerciseId, sets)}
+            />
             <SetRowHeader showIntensity={status === 'completed'} />
             {entry.sets.map((set, i) => (
               <SetRow

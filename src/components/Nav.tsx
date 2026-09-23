@@ -8,7 +8,7 @@ import { ThemeMenu } from './ThemeMenu'
 const links = [
   { to: '/', label: 'Calendar' },
   { to: '/log', label: 'Log Workout' },
-  { to: '/breakdown', label: 'Breakdown' },
+  { to: '/breakdown', label: 'Progress' },
 ]
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>

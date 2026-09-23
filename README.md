@@ -51,5 +51,5 @@ Once set up, that account sees an "Admin" link in the nav bar, and can sign in d
 - **Calendar** — month view with a dot on any day you logged a workout; click a day to open that day's page.
 - **Log Workout** — pick exercises from a built-in library (~70 exercises across push/pull/legs/core/cardio), log sets with reps and weight. Save a workout as a **plan for later** (no RPE yet) or **log as done** (with RPE 1–10 per set); mark a plan done later to fill in RPE.
 - **Day page** — for a given date: a front/back body-map heatmap of which muscles that day's workouts hit, the list of planned/completed sessions, and an AI Coach comment on whether the day's training serves your goals.
-- **Breakdown** — an activity overview: "Most Active Day" and "Least Active Day" stat tiles (by training volume), plus a line chart of daily training volume over the last 30 days with a hover tooltip per day.
+- **Progress** — three views: **Activity** ("Most Active Day" and "Least Active Day" stat tiles plus a 30-day training-volume line chart), **Strength** (per-exercise estimated 1RM trend, heaviest set and recent sessions) and **Body weight** (log weigh-ins and see the trend). Logging a workout also shows what you did "last time" for each exercise.
 - **Admin** (if configured) — a password-only login that lists every account and can delete one, including all of its data.

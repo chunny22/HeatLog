@@ -15,7 +15,9 @@ import {
 } from '../components/ui'
 import { GOALS } from '../data/goals'
 import { useProfile } from '../hooks/useProfile'
+import { saveWeightLog } from '../hooks/useWeightLogs'
 import type { FitnessGoal, HeightUnit, WeightUnit } from '../types'
+import { todayISO } from '../utils/date'
 
 type Feedback = { tone: 'error' | 'success'; text: string } | null
 
@@ -67,6 +69,9 @@ export function ProfilePage() {
       height: Number(height),
       heightUnit,
     })
+    if (!err && profile && (profile.weight !== Number(weight) || profile.weightUnit !== weightUnit)) {
+      await saveWeightLog(todayISO(), Number(weight), weightUnit)
+    }
     setDetailsFeedback(err ? { tone: 'error', text: err } : { tone: 'success', text: 'Profile updated.' })
     setSavingDetails(false)
   }
