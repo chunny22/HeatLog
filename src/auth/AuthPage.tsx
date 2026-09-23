@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import { Alert } from '../components/Alert'
+import { MeasureField } from '../components/MeasureField'
 import { CheckIcon, DumbbellIcon } from '../components/icons'
 import { btnPrimaryClass, chipClass, fieldClass, labelClass, segmentClass, segmentedClass } from '../components/ui'
 import { GOALS } from '../data/goals'
@@ -12,55 +13,6 @@ import { useAuth } from './AuthContext'
 // transition durations below so the dim, swap and resize all land together.
 const SWAP_DELAY_MS = 150
 const RESIZE_MS = 300
-
-// A number field with a small unit toggle (lb/kg, in/cm) inside it.
-function MeasureField<U extends string>({
-  label,
-  value,
-  onValueChange,
-  unit,
-  units,
-  onUnitChange,
-}: {
-  label: string
-  value: string
-  onValueChange: (value: string) => void
-  unit: U
-  units: U[]
-  onUnitChange: (unit: U) => void
-}) {
-  return (
-    <label className={labelClass}>
-      {label}
-      <span className="flex h-12 items-center gap-2 rounded-field bg-inset pr-[5px] pl-4 transition-shadow focus-within:bg-surface focus-within:ring-2 focus-within:ring-accent">
-        <input
-          type="number"
-          required
-          min={0}
-          step="0.1"
-          value={value}
-          onChange={(e) => onValueChange(e.target.value)}
-          className="w-0 min-w-0 flex-1 bg-transparent text-[15px] font-medium text-ink outline-none"
-        />
-        <span role="group" aria-label={`${label} unit`} className="flex rounded-full bg-track p-[3px]">
-          {units.map((u) => (
-            <button
-              key={u}
-              type="button"
-              onClick={() => onUnitChange(u)}
-              aria-pressed={unit === u}
-              className={`h-8 w-[38px] rounded-full text-[13px] font-bold transition-colors ${
-                unit === u ? 'bg-selected text-ink shadow-raised' : 'text-ink-3 hover:text-ink'
-              }`}
-            >
-              {u}
-            </button>
-          ))}
-        </span>
-      </span>
-    </label>
-  )
-}
 
 export function AuthPage() {
   const { session, signIn, signUp } = useAuth()
@@ -75,7 +27,8 @@ export function AuthPage() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [fullName, setFullName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [weight, setWeight] = useState('')
   const [weightUnit, setWeightUnit] = useState<WeightUnit>('lb')
   const [height, setHeight] = useState('')
@@ -165,7 +118,8 @@ export function AuthPage() {
       mode === 'sign-in'
         ? await signIn(email, password)
         : await signUp(email, password, {
-            fullName,
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
             weight: Number(weight),
             weightUnit,
             height: Number(height),
@@ -252,17 +206,30 @@ export function AuthPage() {
 
             {mode === 'sign-up' && (
               <div className="flex animate-auth-extra-in flex-col gap-3.5">
-                <label className={labelClass}>
-                  Name
-                  <input
-                    type="text"
-                    required
-                    autoComplete="name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className={fieldClass}
-                  />
-                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className={labelClass}>
+                    First name
+                    <input
+                      type="text"
+                      required
+                      autoComplete="given-name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className={fieldClass}
+                    />
+                  </label>
+                  <label className={labelClass}>
+                    Last name
+                    <input
+                      type="text"
+                      required
+                      autoComplete="family-name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className={fieldClass}
+                    />
+                  </label>
+                </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <MeasureField

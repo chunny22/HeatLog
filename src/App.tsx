@@ -10,6 +10,7 @@ import { CalendarPage } from './pages/CalendarPage'
 import { CompleteWorkoutPage } from './pages/CompleteWorkoutPage'
 import { DayDetailPage } from './pages/DayDetailPage'
 import { LogWorkoutPage } from './pages/LogWorkoutPage'
+import { ProfilePage } from './pages/ProfilePage'
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -70,6 +71,16 @@ export default function App() {
           <RequireAuth>
             <AppLayout>
               <CompleteWorkoutPage />
+            </AppLayout>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <RequireAuth>
+            <AppLayout>
+              <ProfilePage />
             </AppLayout>
           </RequireAuth>
         }

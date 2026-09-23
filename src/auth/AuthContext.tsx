@@ -41,7 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: {
         data: {
-          full_name: profile.fullName,
+          first_name: profile.firstName,
+          last_name: profile.lastName,
           weight: profile.weight,
           weight_unit: profile.weightUnit,
           height: profile.height,

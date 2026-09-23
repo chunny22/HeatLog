@@ -57,7 +57,8 @@ export type FitnessGoal = 'lose_weight' | 'build_muscle' | 'lean_tone' | 'bulk_s
 
 export interface Profile {
   id: string
-  fullName: string
+  firstName: string
+  lastName: string
   weight: number
   weightUnit: WeightUnit
   height: number
@@ -66,7 +67,8 @@ export interface Profile {
 }
 
 export interface SignUpProfileInput {
-  fullName: string
+  firstName: string
+  lastName: string
   weight: number
   weightUnit: WeightUnit
   height: number

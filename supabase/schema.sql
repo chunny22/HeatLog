@@ -40,7 +40,8 @@ create index if not exists workout_sessions_user_date_idx
 -- their unit alongside the value, same pattern as workout_sessions' sets.
 create table if not exists profiles (
   id uuid primary key references auth.users on delete cascade,
-  full_name text not null,
+  first_name text not null default '',
+  last_name text not null default '',
   weight numeric not null,
   weight_unit text not null check (weight_unit in ('lb', 'kg')),
   height numeric not null,
@@ -71,6 +72,23 @@ alter table profiles add constraint profiles_goals_check
     and array_length(goals, 1) > 0
   );
 
+-- Name was originally a single `full_name`; split into first/last. Backfills
+-- existing rows (first word -> first_name, the rest -> last_name) and drops
+-- the old column, guarded so it's a no-op once already migrated.
+alter table profiles add column if not exists first_name text not null default '';
+alter table profiles add column if not exists last_name text not null default '';
+
+do $$
+begin
+  if exists (select 1 from information_schema.columns where table_name = 'profiles' and column_name = 'full_name') then
+    update profiles
+    set first_name = split_part(btrim(full_name), ' ', 1),
+        last_name = btrim(substr(btrim(full_name), length(split_part(btrim(full_name), ' ', 1)) + 1))
+    where first_name = '' and last_name = '';
+    alter table profiles drop column full_name;
+  end if;
+end $$;
+
 alter table profiles enable row level security;
 
 drop policy if exists "Users manage their own profile" on profiles;
@@ -88,10 +106,11 @@ language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name, weight, weight_unit, height, height_unit, goals)
+  insert into public.profiles (id, first_name, last_name, weight, weight_unit, height, height_unit, goals)
   values (
     new.id,
-    new.raw_user_meta_data->>'full_name',
+    coalesce(new.raw_user_meta_data->>'first_name', ''),
+    coalesce(new.raw_user_meta_data->>'last_name', ''),
     (new.raw_user_meta_data->>'weight')::numeric,
     new.raw_user_meta_data->>'weight_unit',
     (new.raw_user_meta_data->>'height')::numeric,

@@ -1,9 +1,9 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import { DumbbellIcon, LogOutIcon } from './icons'
+import { DumbbellIcon } from './icons'
+import { ProfileMenu } from './ProfileMenu'
 import { ThemeMenu } from './ThemeMenu'
-import { iconBtnClass } from './ui'
 
 const links = [
   { to: '/', label: 'Calendar' },
@@ -17,7 +17,7 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
   }`
 
 export function Nav() {
-  const { session, signOut } = useAuth()
+  const { session } = useAuth()
   const isAdmin = session?.user.email === import.meta.env.VITE_ADMIN_EMAIL
   const location = useLocation()
 
@@ -85,9 +85,7 @@ export function Nav() {
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           <ThemeMenu />
-          <button onClick={signOut} aria-label="Sign out" title="Sign out" className={iconBtnClass}>
-            <LogOutIcon />
-          </button>
+          <ProfileMenu />
         </div>
       </div>
     </nav>

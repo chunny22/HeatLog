@@ -48,7 +48,7 @@ export function ThemeMenu() {
         <div
           role="menu"
           aria-label="Theme"
-          className="absolute top-[54px] right-0 z-40 flex w-58 flex-col gap-0.5 rounded-panel bg-popover p-1.5 shadow-pop"
+          className="absolute top-[60px] right-0 z-40 flex w-58 flex-col gap-0.5 rounded-panel bg-popover p-1.5 shadow-pop"
         >
           <div className="px-3 pt-2 pb-1.5 text-xs font-bold tracking-[0.06em] text-muted uppercase">Theme</div>
           {OPTIONS.map(({ value, label, hint, Icon }) => {
