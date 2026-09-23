@@ -1,3 +1,4 @@
+import { SlidingSegmented } from './SlidingSegmented'
 import { labelClass } from './ui'
 
 // A number field with a small unit toggle (lb/kg, in/cm) inside it.
@@ -29,21 +30,15 @@ export function MeasureField<U extends string>({
           onChange={(e) => onValueChange(e.target.value)}
           className="w-0 min-w-0 flex-1 bg-transparent text-[15px] font-medium text-ink outline-none"
         />
-        <span role="group" aria-label={`${label} unit`} className="flex rounded-full bg-track p-[3px]">
-          {units.map((u) => (
-            <button
-              key={u}
-              type="button"
-              onClick={() => onUnitChange(u)}
-              aria-pressed={unit === u}
-              className={`h-8 w-[38px] rounded-full text-[13px] font-bold transition-colors ${
-                unit === u ? 'bg-selected text-ink shadow-raised' : 'text-ink-3 hover:text-ink'
-              }`}
-            >
-              {u}
-            </button>
-          ))}
-        </span>
+        <SlidingSegmented
+          kind="buttons"
+          ariaLabel={`${label} unit`}
+          options={units.map((u) => ({ value: u, label: u }))}
+          value={unit}
+          onChange={onUnitChange}
+          trackClassName="bg-track p-[3px]"
+          optionClassName="h-8 w-[38px] text-[13px] font-bold"
+        />
       </span>
     </label>
   )

@@ -13,11 +13,11 @@ import {
   segmentClass,
   segmentedClass,
 } from '../ui'
+import { useProfile } from '../../profile/ProfileContext'
 import { ExercisePicker } from './ExercisePicker'
 import { LastTimeHint } from './LastTimeHint'
 import { SetRow, SetRowHeader } from './SetRow'
 
-const DEFAULT_SET: SetEntry = { reps: 0, weight: 0, unit: 'lb' }
 
 interface WorkoutFormProps {
   date: string
@@ -27,6 +27,9 @@ interface WorkoutFormProps {
 }
 
 export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFormProps) {
+  const { profile } = useProfile()
+  const defaultUnit = profile?.unitPreference ?? 'lb'
+  const blankSet = (unit: SetEntry['unit'] = defaultUnit): SetEntry => ({ reps: 0, weight: 0, unit })
   const [status, setStatus] = useState<WorkoutStatus>('planned')
   const [entries, setEntries] = useState<WorkoutEntry[]>([])
   const [notes, setNotes] = useState('')
@@ -36,7 +39,7 @@ export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFor
 
   const addExercise = (exercise: Exercise) => {
     if (entries.some((e) => e.exerciseId === exercise.id)) return
-    setEntries([...entries, { exerciseId: exercise.id, sets: [{ ...DEFAULT_SET }] }])
+    setEntries([...entries, { exerciseId: exercise.id, sets: [blankSet()] }])
   }
 
   const removeExercise = (exerciseId: string) => {
@@ -143,7 +146,7 @@ export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFor
               />
             ))}
             <button
-              onClick={() => updateSets(entry.exerciseId, [...entry.sets, { ...DEFAULT_SET }])}
+              onClick={() => updateSets(entry.exerciseId, [...entry.sets, blankSet(entry.sets[entry.sets.length - 1]?.unit)])}
               className={`${btnSoftSmClass} self-start pl-3`}
             >
               <PlusIcon size={16} />

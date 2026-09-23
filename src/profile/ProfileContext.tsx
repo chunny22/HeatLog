@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useAuth } from '../auth/AuthContext'
 import { supabase } from '../supabase'
 import type { Profile } from '../types'
 
@@ -8,6 +9,7 @@ interface ProfileRow {
   last_name: string
   weight: number
   weight_unit: Profile['weightUnit']
+  unit_preference: Profile['unitPreference']
   height: number
   height_unit: Profile['heightUnit']
   goals: Profile['goals']
@@ -20,13 +22,28 @@ function rowToProfile(row: ProfileRow): Profile {
     lastName: row.last_name,
     weight: row.weight,
     weightUnit: row.weight_unit,
+    unitPreference: row.unit_preference,
     height: row.height,
     heightUnit: row.height_unit,
     goals: row.goals,
   }
 }
 
-export function useProfile() {
+interface ProfileContextValue {
+  profile: Profile | null
+  loading: boolean
+  error: string | null
+  refresh: () => Promise<void>
+  updateProfile: (patch: Partial<Omit<Profile, 'id'>>) => Promise<string | null>
+}
+
+const ProfileContext = createContext<ProfileContextValue | null>(null)
+
+// One shared copy of the signed-in user's profile, so the menu, workout form,
+// charts and Profile page all see the same data (and edits show up everywhere).
+export function ProfileProvider({ children }: { children: ReactNode }) {
+  const { session } = useAuth()
+  const userId = session?.user.id ?? null
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -35,7 +52,7 @@ export function useProfile() {
     setLoading(true)
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, first_name, last_name, weight, weight_unit, height, height_unit, goals')
+      .select('id, first_name, last_name, weight, weight_unit, unit_preference, height, height_unit, goals')
       .single()
 
     if (error) {
@@ -48,8 +65,14 @@ export function useProfile() {
   }, [])
 
   useEffect(() => {
+    if (!userId) {
+      setProfile(null)
+      setError(null)
+      setLoading(false)
+      return
+    }
     refresh()
-  }, [refresh])
+  }, [userId, refresh])
 
   const updateProfile = useCallback(
     async (patch: Partial<Omit<Profile, 'id'>>): Promise<string | null> => {
@@ -59,17 +82,34 @@ export function useProfile() {
       if (patch.lastName !== undefined) row.last_name = patch.lastName
       if (patch.weight !== undefined) row.weight = patch.weight
       if (patch.weightUnit !== undefined) row.weight_unit = patch.weightUnit
+      if (patch.unitPreference !== undefined) row.unit_preference = patch.unitPreference
       if (patch.height !== undefined) row.height = patch.height
       if (patch.heightUnit !== undefined) row.height_unit = patch.heightUnit
       if (patch.goals !== undefined) row.goals = patch.goals
 
-      const { error } = await supabase.from('profiles').update(row).eq('id', profile.id)
-      if (error) return error.message
+      // Apply immediately so toggles feel instant; roll back if the save fails.
+      const previous = profile
       setProfile({ ...profile, ...patch })
+      const { error } = await supabase.from('profiles').update(row).eq('id', profile.id)
+      if (error) {
+        setProfile(previous)
+        return error.message
+      }
       return null
     },
     [profile],
   )
 
-  return { profile, loading, error, refresh, updateProfile }
+  const value = useMemo(
+    () => ({ profile, loading, error, refresh, updateProfile }),
+    [profile, loading, error, refresh, updateProfile],
+  )
+
+  return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>
+}
+
+export function useProfile(): ProfileContextValue {
+  const ctx = useContext(ProfileContext)
+  if (!ctx) throw new Error('useProfile must be used inside <ProfileProvider>')
+  return ctx
 }

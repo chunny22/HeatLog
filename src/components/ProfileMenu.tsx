@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import { useProfile } from '../hooks/useProfile'
-import { LogOutIcon, TargetIcon, UserIcon } from './icons'
+import { useProfile } from '../profile/ProfileContext'
+import type { WeightUnit } from '../types'
+import { DumbbellIcon, LogOutIcon, UserIcon } from './icons'
+import { SlidingSegmented } from './SlidingSegmented'
 
 function initials(name: string | undefined, email: string | undefined): string {
   const source = name?.trim() || email?.split('@')[0] || '?'
@@ -11,12 +13,17 @@ function initials(name: string | undefined, email: string | undefined): string {
   return letters.toUpperCase()
 }
 
+const UNIT_OPTIONS: { value: WeightUnit; label: string }[] = [
+  { value: 'lb', label: 'lb' },
+  { value: 'kg', label: 'kg' },
+]
+
 const itemClass =
   'flex min-h-[46px] items-center gap-3 rounded-field px-3 text-left text-sm font-semibold text-ink transition-colors hover:bg-sunken'
 
 export function ProfileMenu() {
   const { session, signOut } = useAuth()
-  const { profile, refresh } = useProfile()
+  const { profile, updateProfile } = useProfile()
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
 
@@ -39,15 +46,10 @@ export function ProfileMenu() {
     }
   }, [open])
 
-  const toggle = () => {
-    if (!open) refresh()
-    setOpen(!open)
-  }
-
   return (
     <div ref={rootRef} className="relative">
       <button
-        onClick={toggle}
+        onClick={() => setOpen(!open)}
         aria-label="Profile menu"
         title="Profile"
         aria-haspopup="menu"
@@ -77,10 +79,19 @@ export function ProfileMenu() {
             <UserIcon className="text-ink-3" />
             Edit profile
           </Link>
-          <Link to="/profile#goals" role="menuitem" onClick={() => setOpen(false)} className={itemClass}>
-            <TargetIcon className="text-ink-3" />
-            Workout goals
-          </Link>
+          <div className="flex min-h-[46px] items-center gap-3 px-3 text-sm font-semibold text-ink">
+            <DumbbellIcon className="text-ink-3" />
+            <span>Weight units</span>
+            <SlidingSegmented
+              kind="buttons"
+              ariaLabel="Weight units"
+              className="ml-auto"
+              options={UNIT_OPTIONS}
+              value={profile?.unitPreference ?? 'lb'}
+              onChange={(unitPreference) => void updateProfile({ unitPreference })}
+              optionClassName="h-[30px] w-11 text-xs font-bold"
+            />
+          </div>
           <div className="mx-2 my-1 h-px bg-line" />
           <button
             role="menuitem"

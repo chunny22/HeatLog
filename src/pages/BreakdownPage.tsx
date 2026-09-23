@@ -6,7 +6,7 @@ import { BodyWeightPanel } from '../components/breakdown/BodyWeightPanel'
 import { StrengthPanel } from '../components/breakdown/StrengthPanel'
 import { SlidingSegmented } from '../components/SlidingSegmented'
 import { cardClass, cardTitleClass, pageClass, pageTitleClass } from '../components/ui'
-import { useProfile } from '../hooks/useProfile'
+import { useProfile } from '../profile/ProfileContext'
 import { useSessions } from '../hooks/useSessions'
 import { computeDailyVolume, findLeastActiveDay, findMostActiveDay } from '../utils/dailyActivity'
 
@@ -28,7 +28,7 @@ export function BreakdownPage() {
   const mostActive = useMemo(() => findMostActiveDay(series), [series])
   const leastActive = useMemo(() => findLeastActiveDay(series), [series])
   const hasActivity = series.some((d) => d.volume > 0)
-  const unit = profile?.weightUnit ?? 'lb'
+  const unit = profile?.unitPreference ?? 'lb'
 
   return (
     <div className={pageClass}>

@@ -1,5 +1,4 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useLocation } from 'react-router-dom'
 import { Alert } from '../components/Alert'
 import { CheckIcon } from '../components/icons'
 import { MeasureField } from '../components/MeasureField'
@@ -14,7 +13,7 @@ import {
   pageTitleClass,
 } from '../components/ui'
 import { GOALS } from '../data/goals'
-import { useProfile } from '../hooks/useProfile'
+import { useProfile } from '../profile/ProfileContext'
 import { saveWeightLog } from '../hooks/useWeightLogs'
 import type { FitnessGoal, HeightUnit, WeightUnit } from '../types'
 import { todayISO } from '../utils/date'
@@ -23,7 +22,6 @@ type Feedback = { tone: 'error' | 'success'; text: string } | null
 
 export function ProfilePage() {
   const { profile, loading, error, updateProfile } = useProfile()
-  const { hash } = useLocation()
 
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -50,12 +48,6 @@ export function ProfilePage() {
     setGoals(profile.goals)
     setHydrated(true)
   }, [profile, hydrated])
-
-  useEffect(() => {
-    if (hash === '#goals' && hydrated) {
-      document.getElementById('goals')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
-  }, [hash, hydrated])
 
   const saveDetails = async (e: FormEvent) => {
     e.preventDefault()
@@ -151,7 +143,7 @@ export function ProfilePage() {
             </button>
           </form>
 
-          <form id="goals" onSubmit={saveGoals} className={`${cardClass} flex scroll-mt-28 flex-col gap-4`}>
+          <form onSubmit={saveGoals} className={`${cardClass} flex flex-col gap-4`}>
             <div className="flex flex-col gap-1">
               <h2 className={cardTitleClass}>Workout goals</h2>
               <p className="text-[13px] text-ink-3">Pick all that apply. Your AI coach uses these.</p>

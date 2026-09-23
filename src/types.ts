@@ -61,6 +61,8 @@ export interface Profile {
   lastName: string
   weight: number
   weightUnit: WeightUnit
+  /** Default unit for new sets and the Progress charts (separate from the body-weight unit). */
+  unitPreference: WeightUnit
   height: number
   heightUnit: HeightUnit
   goals: FitnessGoal[]

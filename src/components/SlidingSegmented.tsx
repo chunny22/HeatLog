@@ -10,6 +10,10 @@ interface SlidingSegmentedProps<T extends string> {
   /** Size/typography for each option; must not set a background or text colour. */
   optionClassName: string
   className?: string
+  /** Track background and padding; the raised pill inherits the padding as its inset. */
+  trackClassName?: string
+  /** Pill colour (defaults to the raised "selected" surface). */
+  pillClassName?: string
 }
 
 // A segmented control whose raised "selected" pill slides to the chosen option.
@@ -23,8 +27,10 @@ export function SlidingSegmented<T extends string>({
   kind,
   optionClassName,
   className = '',
+  trackClassName = 'bg-sunken p-1',
+  pillClassName = 'bg-selected shadow-raised',
 }: SlidingSegmentedProps<T>) {
-  const trackRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLSpanElement>(null)
   const [pill, setPill] = useState<{ left: number; top: number; width: number; height: number } | null>(null)
 
   useLayoutEffect(() => {
@@ -34,7 +40,12 @@ export function SlidingSegmented<T extends string>({
       if (!track || !active) return
       const t = track.getBoundingClientRect()
       const a = active.getBoundingClientRect()
-      setPill({ left: a.left - t.left, top: a.top - t.top, width: a.width, height: a.height })
+      const next = { left: a.left - t.left, top: a.top - t.top, width: a.width, height: a.height }
+      setPill((prev) =>
+        prev && prev.left === next.left && prev.top === next.top && prev.width === next.width && prev.height === next.height
+          ? prev
+          : next,
+      )
     }
 
     measure()
@@ -44,16 +55,16 @@ export function SlidingSegmented<T extends string>({
   }, [value, options])
 
   return (
-    <div
+    <span
       ref={trackRef}
       role={kind === 'tabs' ? 'tablist' : 'group'}
       aria-label={ariaLabel}
-      className={`relative flex rounded-full bg-sunken p-1 ${className}`}
+      className={`relative flex rounded-full ${trackClassName} ${className}`}
     >
       {pill && (
         <span
           aria-hidden="true"
-          className="absolute top-0 left-0 z-0 rounded-full bg-selected shadow-raised transition-[transform,width] duration-300 ease-out"
+          className={`absolute top-0 left-0 z-0 rounded-full ${pillClassName} transition-[transform,width] duration-300 ease-out`}
           style={{ width: pill.width, height: pill.height, transform: `translate(${pill.left}px, ${pill.top}px)` }}
         />
       )}
@@ -76,6 +87,6 @@ export function SlidingSegmented<T extends string>({
           </button>
         )
       })}
-    </div>
+    </span>
   )
 }

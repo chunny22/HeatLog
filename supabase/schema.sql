@@ -89,6 +89,15 @@ begin
   end if;
 end $$;
 
+-- Default unit for new sets and the Progress charts. Separate from weight_unit
+-- (the unit of the stored body weight). Existing rows start from their weight_unit.
+alter table profiles add column if not exists unit_preference text;
+update profiles set unit_preference = weight_unit where unit_preference is null;
+alter table profiles alter column unit_preference set default 'lb';
+alter table profiles alter column unit_preference set not null;
+alter table profiles drop constraint if exists profiles_unit_preference_check;
+alter table profiles add constraint profiles_unit_preference_check check (unit_preference in ('lb', 'kg'));
+
 alter table profiles enable row level security;
 
 drop policy if exists "Users manage their own profile" on profiles;
@@ -106,12 +115,13 @@ language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, first_name, last_name, weight, weight_unit, height, height_unit, goals)
+  insert into public.profiles (id, first_name, last_name, weight, weight_unit, unit_preference, height, height_unit, goals)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'first_name', ''),
     coalesce(new.raw_user_meta_data->>'last_name', ''),
     (new.raw_user_meta_data->>'weight')::numeric,
+    new.raw_user_meta_data->>'weight_unit',
     new.raw_user_meta_data->>'weight_unit',
     (new.raw_user_meta_data->>'height')::numeric,
     new.raw_user_meta_data->>'height_unit',

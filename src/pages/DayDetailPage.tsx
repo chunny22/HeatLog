@@ -10,7 +10,7 @@ import { ArrowLeftIcon } from '../components/icons'
 import { cardClass, cardTitleClass, pageClass, pageTitleClass, panelClass } from '../components/ui'
 import { useDayInsight } from '../hooks/useDayInsight'
 import { useMuscleVolume } from '../hooks/useMuscleVolume'
-import { useProfile } from '../hooks/useProfile'
+import { useProfile } from '../profile/ProfileContext'
 import { useSessions } from '../hooks/useSessions'
 import type { FitnessGoal } from '../types'
 
