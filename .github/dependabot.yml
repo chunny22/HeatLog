@@ -1,0 +1,26 @@
+version: 2
+updates:
+  # App dependencies (React, Supabase, Vite, Tailwind, Vitest, ...).
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: deps
+    groups:
+      # Minor and patch bumps arrive together as one pull request; major
+      # versions still get their own so breaking changes are reviewed alone.
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  # The actions used by .github/workflows (checkout, setup-node, ...).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns: ['*']
