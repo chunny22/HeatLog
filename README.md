@@ -9,7 +9,7 @@ Track workouts, sets/reps, intensity, and see a heatmap of which muscles you've 
    npm install
    ```
 2. Create a free project at [supabase.com](https://supabase.com).
-3. In the project's **SQL Editor**, run the entire script in [`supabase/schema.sql`](supabase/schema.sql) — it creates the `workout_sessions`, `profiles`, and `day_insights` tables, all with row-level security so each user only sees their own data. Safe to re-run in full any time this file changes.
+3. In the project's **SQL Editor**, run the entire script in [`supabase/schema.sql`](supabase/schema.sql) — it creates the `workout_sessions`, `profiles`, `weight_logs`, and `day_insights` tables, all with row-level security so each user only sees their own data. Safe to re-run in full any time this file changes.
 4. Copy `.env.local.example` to `.env.local` and fill in your project's **Project URL** and **anon public key** (found under Settings → API):
    ```bash
    cp .env.local.example .env.local
@@ -19,6 +19,15 @@ Track workouts, sets/reps, intensity, and see a heatmap of which muscles you've 
    npm run dev
    ```
 6. Sign up with an email/password on the app's sign-in screen. If Supabase's "Confirm email" setting is on (default), check your inbox before signing in.
+
+### Tests
+
+```bash
+npm test          # run the unit tests once
+npm run test:watch
+```
+
+The suite ([Vitest](https://vitest.dev)) covers the pure logic: muscle volume, day-insight fingerprints, progress/strength calculations, date handling, and a check that the goal options match the database constraint in `supabase/schema.sql`. CI runs it on every push and pull request.
 
 ### AI Coach setup (optional but required for the day-insight feature)
 
