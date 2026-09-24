@@ -86,7 +86,7 @@ export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFor
               type="date"
               value={date}
               onChange={(e) => onDateChange(e.target.value)}
-              className="bg-transparent text-[15px] font-semibold text-ink outline-none"
+              className="bg-transparent text-base sm:text-[15px] font-semibold text-ink outline-none"
             />
           </span>
         </label>
@@ -165,7 +165,7 @@ export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFor
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
               placeholder="How did it feel?"
-              className="resize-none rounded-[18px] bg-inset px-4 py-3.5 text-[15px] font-medium text-ink outline-none transition-shadow placeholder:font-normal placeholder:text-muted focus:bg-surface focus:ring-2 focus:ring-accent"
+              className="resize-none rounded-[18px] bg-inset px-4 py-3.5 text-base sm:text-[15px] font-medium text-ink outline-none transition-shadow placeholder:font-normal placeholder:text-muted focus:bg-surface focus:ring-2 focus:ring-accent"
             />
           </label>
 

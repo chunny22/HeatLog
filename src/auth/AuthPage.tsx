@@ -148,7 +148,7 @@ export function AuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-page px-4 py-12">
+    <div className="flex min-h-dvh items-center justify-center bg-page px-4 py-12">
       <div
         ref={cardRef}
         className="flex w-full max-w-[480px] flex-col gap-6 overflow-hidden rounded-[32px] bg-surface p-6 shadow-card transition-[height] duration-300 ease-out sm:p-9"
@@ -224,7 +224,7 @@ export function AuthPage() {
               <button
                 type="button"
                 onClick={() => switchMode('reset')}
-                className="-mt-1.5 self-end text-[13px] font-bold text-accent transition-colors hover:text-accent-hover"
+                className="-mt-3 -mb-1.5 self-end py-2.5 text-[13px] font-bold text-accent transition-colors hover:text-accent-hover"
               >
                 Forgot password?
               </button>

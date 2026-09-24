@@ -33,7 +33,7 @@ export function LastTimeHint({ sessions, exerciseId, date, onUse }: LastTimeHint
       <button
         type="button"
         onClick={() => onUse(last.sets.map(({ reps, weight, unit }) => ({ reps, weight, unit })))}
-        className="h-8 shrink-0 rounded-full bg-accent px-3.5 text-xs font-bold text-white transition-colors hover:bg-accent-hover"
+        className="h-9 shrink-0 rounded-full bg-accent px-4 text-xs font-bold text-white transition-colors hover:bg-accent-hover"
       >
         Use
       </button>

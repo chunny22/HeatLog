@@ -32,7 +32,7 @@ export function AdminLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-page px-4 py-12">
+    <div className="flex min-h-dvh items-center justify-center bg-page px-4 py-12">
       <div className="flex w-full max-w-[420px] flex-col gap-6 rounded-[32px] bg-surface p-6 shadow-card sm:p-9">
         <div className="flex flex-col items-center gap-3.5 text-center">
           <span className="flex size-[60px] items-center justify-center rounded-full bg-ink text-page">

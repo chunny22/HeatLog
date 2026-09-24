@@ -113,6 +113,11 @@ export const TargetIcon = (p: IconProps) => (
     <circle cx="12" cy="12" r="4" />
   </Icon>
 )
+export const TrendIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 17l6-6 4 4 8-8M15 7h6v6" />
+  </Icon>
+)
 export const CalendarIcon =(p: IconProps) => (
   <Icon {...p}>
     <rect x="3" y="4" width="18" height="18" rx="4" />

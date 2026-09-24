@@ -34,7 +34,7 @@ export function ExercisePicker({ onAdd, addedIds = [] }: ExercisePickerProps) {
           aria-label="Search exercises"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="min-w-0 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-muted"
+          className="min-w-0 flex-1 bg-transparent text-base sm:text-[15px] text-ink outline-none placeholder:text-muted"
         />
       </label>
       <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">

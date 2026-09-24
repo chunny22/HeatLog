@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { useProfile } from '../profile/ProfileContext'
 import type { WeightUnit } from '../types'
-import { DumbbellIcon, LogOutIcon, UserIcon } from './icons'
+import { DumbbellIcon, LockIcon, LogOutIcon, UserIcon } from './icons'
 import { SlidingSegmented } from './SlidingSegmented'
 
 function initials(name: string | undefined, email: string | undefined): string {
@@ -28,6 +28,7 @@ export function ProfileMenu() {
   const rootRef = useRef<HTMLDivElement>(null)
 
   const email = session?.user.email
+  const isAdmin = email === import.meta.env.VITE_ADMIN_EMAIL
   const label = initials(`${profile?.firstName ?? ''} ${profile?.lastName ?? ''}`, email)
 
   useEffect(() => {
@@ -79,6 +80,12 @@ export function ProfileMenu() {
             <UserIcon className="text-ink-3" />
             Edit profile
           </Link>
+          {isAdmin && (
+            <Link to="/admin" role="menuitem" onClick={() => setOpen(false)} className={`${itemClass} sm:hidden`}>
+              <LockIcon className="text-ink-3" />
+              Admin
+            </Link>
+          )}
           <div className="flex min-h-[46px] items-center gap-3 px-3 text-sm font-semibold text-ink">
             <DumbbellIcon className="text-ink-3" />
             <span>Weight units</span>

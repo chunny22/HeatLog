@@ -9,7 +9,7 @@ export function RangeChips({ value, onChange }: { value: Range; onChange: (range
       options={RANGE_OPTIONS}
       value={value}
       onChange={onChange}
-      optionClassName="h-8 px-3.5 text-xs font-bold"
+      optionClassName="h-10 px-3.5 text-xs font-bold sm:h-8"
     />
   )
 }

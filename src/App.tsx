@@ -15,7 +15,7 @@ import { ProfilePage } from './pages/ProfilePage'
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-page">
+    <div className="min-h-dvh bg-page pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-0">
       <Nav />
       {children}
     </div>

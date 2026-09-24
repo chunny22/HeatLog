@@ -9,7 +9,7 @@ export const panelClass = 'rounded-panel bg-inset p-4 sm:p-5'
 
 export const labelClass = 'flex flex-col gap-2 text-[13px] font-bold text-ink-2'
 export const fieldClass =
-  'h-12 w-full rounded-field bg-inset px-4 text-[15px] font-medium text-ink outline-none transition-shadow placeholder:font-normal placeholder:text-muted focus:bg-surface focus:ring-2 focus:ring-accent'
+  'h-12 w-full rounded-field bg-inset px-4 text-base sm:text-[15px] font-medium text-ink outline-none transition-shadow placeholder:font-normal placeholder:text-muted focus:bg-surface focus:ring-2 focus:ring-accent'
 
 const pill =
   'inline-flex items-center justify-center gap-2 rounded-full font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-60'
@@ -25,7 +25,7 @@ export const iconBtnSmClass = `${circle} size-9 bg-sunken text-ink-3 hover:bg-li
 export const iconBtnDangerClass = `${circle} size-10 bg-danger-soft text-danger-ink hover:brightness-95`
 
 export function chipClass(active: boolean) {
-  return `inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-[13px] transition-colors ${
+  return `inline-flex h-10 shrink-0 items-center gap-1.5 sm:h-9 whitespace-nowrap rounded-full px-4 text-[13px] transition-colors ${
     active ? 'bg-accent font-bold text-white' : 'bg-sunken font-semibold text-ink-2 hover:bg-line'
   }`
 }

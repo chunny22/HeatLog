@@ -50,7 +50,7 @@ export function StrengthPanel({ sessions, unit }: { sessions: WorkoutSession[]; 
             value={exerciseId}
             onChange={(e) => setPicked(e.target.value)}
             aria-label="Exercise"
-            className="h-11 min-w-[200px] appearance-none rounded-field bg-inset pr-10 pl-4 text-[15px] font-semibold text-ink outline-none focus:bg-surface focus:ring-2 focus:ring-accent"
+            className="h-11 min-w-[200px] appearance-none rounded-field bg-inset pr-10 pl-4 text-base sm:text-[15px] font-semibold text-ink outline-none focus:bg-surface focus:ring-2 focus:ring-accent"
           >
             {exerciseIds.map((id) => (
               <option key={id} value={id}>

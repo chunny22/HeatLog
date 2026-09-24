@@ -117,6 +117,7 @@
   --shadow-card: var(--sh-card);
   --shadow-pop: var(--sh-pop);
   --shadow-raised: var(--sh-raised);
+  --shadow-bar: var(--sh-bar);
 }
 
 body {

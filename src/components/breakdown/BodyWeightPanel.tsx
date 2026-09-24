@@ -94,7 +94,7 @@ export function BodyWeightPanel({ unit }: { unit: WeightUnit }) {
             onChange={(e) => setWeight(e.target.value)}
             placeholder="Weight"
             aria-label="Weight"
-            className="w-0 min-w-0 flex-1 bg-transparent text-[15px] font-semibold text-ink outline-none placeholder:font-normal placeholder:text-muted"
+            className="w-0 min-w-0 flex-1 bg-transparent text-base sm:text-[15px] font-semibold text-ink outline-none placeholder:font-normal placeholder:text-muted"
           />
           <span className="text-sm font-bold text-ink-3">{unit}</span>
         </span>
@@ -105,7 +105,7 @@ export function BodyWeightPanel({ unit }: { unit: WeightUnit }) {
           max={todayISO()}
           onChange={(e) => setDate(e.target.value)}
           aria-label="Date"
-          className="h-12 rounded-field bg-inset px-4 text-[15px] font-semibold text-ink outline-none transition-shadow focus:bg-surface focus:ring-2 focus:ring-accent"
+          className="h-12 rounded-field bg-inset px-4 text-base sm:text-[15px] font-semibold text-ink outline-none transition-shadow focus:bg-surface focus:ring-2 focus:ring-accent"
         />
         <button type="submit" disabled={saving} className={btnPrimaryClass}>
           {saving ? 'Saving…' : 'Log'}

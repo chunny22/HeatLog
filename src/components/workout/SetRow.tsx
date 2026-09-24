@@ -11,7 +11,7 @@ interface SetRowProps {
 }
 
 const inputClass =
-  'h-11 rounded-[14px] bg-inset text-[15px] font-semibold text-ink outline-none transition-shadow placeholder:font-normal placeholder:text-muted focus:bg-surface focus:ring-2 focus:ring-accent px-2.5 sm:px-3.5'
+  'h-11 rounded-[14px] bg-inset text-base sm:text-[15px] font-semibold text-ink outline-none transition-shadow placeholder:font-normal placeholder:text-muted focus:bg-surface focus:ring-2 focus:ring-accent px-2.5 sm:px-3.5'
 
 // Column widths, shared by the header row and every set row so they line up.
 const col = {

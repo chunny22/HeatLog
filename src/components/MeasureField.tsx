@@ -28,7 +28,7 @@ export function MeasureField<U extends string>({
           step="0.1"
           value={value}
           onChange={(e) => onValueChange(e.target.value)}
-          className="w-0 min-w-0 flex-1 bg-transparent text-[15px] font-medium text-ink outline-none"
+          className="w-0 min-w-0 flex-1 bg-transparent text-base sm:text-[15px] font-medium text-ink outline-none"
         />
         <SlidingSegmented
           kind="buttons"
