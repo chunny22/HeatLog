@@ -21,7 +21,7 @@ import { todayISO } from '../utils/date'
 type Feedback = { tone: 'error' | 'success'; text: string } | null
 
 export function ProfilePage() {
-  const { profile, loading, error, updateProfile } = useProfile()
+  const { profile, loading, error, refresh, updateProfile } = useProfile()
 
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -35,6 +35,11 @@ export function ProfilePage() {
   const [savingDetails, setSavingDetails] = useState(false)
   const [savingGoals, setSavingGoals] = useState(false)
   const [hydrated, setHydrated] = useState(false)
+
+  // If the shared profile failed to load earlier, try again when this page opens.
+  useEffect(() => {
+    if (error && !profile) void refresh()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fill the form once, when the profile first arrives.
   useEffect(() => {

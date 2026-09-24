@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { useAuth } from '../auth/AuthContext'
 import { supabase } from '../supabase'
 import type { Profile } from '../types'
+import { retryWhile } from '../utils/retry'
 
 interface ProfileRow {
   id: string
@@ -50,10 +51,18 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, first_name, last_name, weight, weight_unit, unit_preference, height, height_unit, goals')
-      .single()
+    // Right after sign-in Supabase can briefly reject the new token ("JWT issued
+    // at future" -- its servers' clocks are a moment apart), so retry a few times
+    // instead of showing a permanent error.
+    const { data, error } = await retryWhile(
+      async () =>
+        supabase
+          .from('profiles')
+          .select('id, first_name, last_name, weight, weight_unit, unit_preference, height, height_unit, goals')
+          .single(),
+      (result) => Boolean(result.error),
+      [800, 1600, 3200],
+    )
 
     if (error) {
       setError(error.message)
