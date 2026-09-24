@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import { Alert } from '../components/Alert'
 import { MeasureField } from '../components/MeasureField'
-import { CheckIcon, DumbbellIcon } from '../components/icons'
+import { ArrowLeftIcon, CheckIcon, DumbbellIcon } from '../components/icons'
 import { btnPrimaryClass, chipClass, fieldClass, labelClass, segmentClass, segmentedClass } from '../components/ui'
 import { GOALS } from '../data/goals'
 import type { FitnessGoal, HeightUnit, WeightUnit } from '../types'
@@ -14,15 +14,23 @@ import { useAuth } from './AuthContext'
 const SWAP_DELAY_MS = 150
 const RESIZE_MS = 300
 
+type Mode = 'sign-in' | 'sign-up' | 'reset'
+
+const HEADINGS: Record<Mode, { title: string; subtitle: string }> = {
+  'sign-in': { title: 'Welcome back', subtitle: 'Track your workouts from any device.' },
+  'sign-up': { title: 'Create account', subtitle: 'Track your workouts from any device.' },
+  reset: { title: 'Reset password', subtitle: "Enter your email and we'll send you a link to choose a new one." },
+}
+
 export function AuthPage() {
-  const { session, signIn, signUp } = useAuth()
+  const { session, signIn, signUp, resetPassword } = useAuth()
 
   // `activeTab` reflects the clicked tab instantly. `mode` is what's actually
   // rendered (title, fields, submit label) and lags behind it by
   // SWAP_DELAY_MS, so the field swap happens once the fields have faded out
   // rather than popping while still visible.
   const [activeTab, setActiveTab] = useState<'sign-in' | 'sign-up'>('sign-in')
-  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in')
+  const [mode, setMode] = useState<Mode>('sign-in')
   const [dimmed, setDimmed] = useState(false)
 
   const [email, setEmail] = useState('')
@@ -84,10 +92,10 @@ export function AuthPage() {
     return <Navigate to="/" replace />
   }
 
-  const switchMode = (next: 'sign-in' | 'sign-up') => {
-    if (next === activeTab || pendingResizeRef.current) return
+  const switchMode = (next: Mode) => {
+    if (next === mode || pendingResizeRef.current) return
 
-    setActiveTab(next)
+    if (next !== 'reset') setActiveTab(next)
     setError(null)
     setMessage(null)
 
@@ -115,9 +123,11 @@ export function AuthPage() {
     setSubmitting(true)
 
     const result =
-      mode === 'sign-in'
-        ? await signIn(email, password)
-        : await signUp(email, password, {
+      mode === 'reset'
+        ? await resetPassword(email)
+        : mode === 'sign-in'
+          ? await signIn(email, password)
+          : await signUp(email, password, {
             firstName: firstName.trim(),
             lastName: lastName.trim(),
             weight: Number(weight),
@@ -131,6 +141,8 @@ export function AuthPage() {
       setError(result.error)
     } else if (mode === 'sign-up') {
       setMessage('Account created. Check your email to confirm, then sign in.')
+    } else if (mode === 'reset') {
+      setMessage('If an account exists for that email, a reset link is on its way. Check your inbox.')
     }
     setSubmitting(false)
   }
@@ -147,12 +159,13 @@ export function AuthPage() {
           </span>
           <div>
             <h1 className="mb-1.5 text-[26px] font-extrabold tracking-tight text-ink">
-              {mode === 'sign-in' ? 'Welcome back' : 'Create account'}
+              {HEADINGS[mode].title}
             </h1>
-            <p className="text-sm text-ink-3">Track your workouts from any device.</p>
+            <p className="text-sm text-ink-3">{HEADINGS[mode].subtitle}</p>
           </div>
         </div>
 
+        {mode !== 'reset' && (
         <div role="tablist" aria-label="Account" className={segmentedClass}>
           <button
             type="button"
@@ -173,6 +186,7 @@ export function AuthPage() {
             Create account
           </button>
         </div>
+        )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
           <div
@@ -191,6 +205,7 @@ export function AuthPage() {
                 className={fieldClass}
               />
             </label>
+            {mode !== 'reset' && (
             <label className={labelClass}>
               Password
               <input
@@ -203,6 +218,17 @@ export function AuthPage() {
                 className={fieldClass}
               />
             </label>
+            )}
+
+            {mode === 'sign-in' && (
+              <button
+                type="button"
+                onClick={() => switchMode('reset')}
+                className="-mt-1.5 self-end text-[13px] font-bold text-accent transition-colors hover:text-accent-hover"
+              >
+                Forgot password?
+              </button>
+            )}
 
             {mode === 'sign-up' && (
               <div className="flex animate-auth-extra-in flex-col gap-3.5">
@@ -285,8 +311,18 @@ export function AuthPage() {
           {message && <Alert tone="success">{message}</Alert>}
 
           <button type="submit" disabled={submitting} className={`${btnPrimaryClass} mt-2.5 h-[54px] text-base`}>
-            {mode === 'sign-in' ? 'Sign in' : 'Create account'}
+            {mode === 'sign-in' ? 'Sign in' : mode === 'sign-up' ? 'Create account' : 'Send reset link'}
           </button>
+          {mode === 'reset' && (
+            <button
+              type="button"
+              onClick={() => switchMode('sign-in')}
+              className="flex items-center justify-center gap-1.5 self-center text-[13px] font-bold text-ink-3 transition-colors hover:text-ink"
+            >
+              <ArrowLeftIcon size={14} />
+              Back to sign in
+            </button>
+          )}
         </form>
       </div>
     </div>

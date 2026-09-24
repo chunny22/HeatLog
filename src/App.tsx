@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import { AdminLoginPage } from './auth/AdminLoginPage'
 import { AuthPage } from './auth/AuthPage'
+import { ResetPasswordPage } from './auth/ResetPasswordPage'
 import { RequireAdmin } from './auth/RequireAdmin'
 import { RequireAuth } from './auth/RequireAuth'
 import { Nav } from './components/Nav'
@@ -25,6 +26,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/auth" element={<AuthPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route
         path="/"
         element={

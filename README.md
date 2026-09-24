@@ -1,6 +1,6 @@
-# Workout Tracker
+# HeatLog
 
-Track workouts, sets/reps, intensity, and see a heatmap of which muscles you've been training, on a calendar. Data is stored in Supabase so it's available on both your PC and your phone. Each day also gets a short AI-generated coaching comment on whether that day's training covers your stated fitness goal.
+A workout tracker: track workouts, sets/reps, intensity, and see a heatmap of which muscles you've been training, on a calendar. Data is stored in Supabase so it's available on both your PC and your phone. Each day also gets a short AI-generated coaching comment on whether that day's training covers your stated fitness goal.
 
 ## Setup
 
