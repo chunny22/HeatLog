@@ -2,17 +2,18 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../supabase'
 import type { SignUpProfileInput } from '../types'
+import { interpretSignUp, type AuthResult } from './signUpResult'
 
 interface AuthContextValue {
   session: Session | null
   loading: boolean
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>
-  signUp: (email: string, password: string, profile: SignUpProfileInput) => Promise<{ error: string | null }>
+  signIn: (email: string, password: string) => Promise<AuthResult>
+  signUp: (email: string, password: string, profile: SignUpProfileInput) => Promise<AuthResult>
   signOut: () => Promise<void>
   /** Emails a password-reset link. Succeeds whether or not the account exists. */
-  resetPassword: (email: string) => Promise<{ error: string | null }>
+  resetPassword: (email: string) => Promise<AuthResult>
   /** Sets a new password for the signed-in (or recovery-link) session. */
-  updatePassword: (password: string) => Promise<{ error: string | null }>
+  updatePassword: (password: string) => Promise<AuthResult>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -40,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signUp: AuthContextValue['signUp'] = async (email, password, profile) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -56,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       },
     })
-    return { error: error?.message ?? null }
+    return interpretSignUp(data, error)
   }
 
   const signOut = async () => {

@@ -2,7 +2,8 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Alert } from '../components/Alert'
 import { DumbbellIcon, LockIcon } from '../components/icons'
-import { btnPrimaryClass, fieldClass, labelClass } from '../components/ui'
+import { PasswordField } from '../components/PasswordField'
+import { btnPrimaryClass } from '../components/ui'
 import { useAuth } from './AuthContext'
 
 const MIN_LENGTH = 6
@@ -67,30 +68,20 @@ export function ResetPasswordPage() {
 
         {!loading && session && (
           <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-            <label className={labelClass}>
-              New password
-              <input
-                type="password"
-                required
-                minLength={MIN_LENGTH}
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={fieldClass}
-              />
-            </label>
-            <label className={labelClass}>
-              Confirm password
-              <input
-                type="password"
-                required
-                minLength={MIN_LENGTH}
-                autoComplete="new-password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                className={fieldClass}
-              />
-            </label>
+            <PasswordField
+              label="New password"
+              minLength={MIN_LENGTH}
+              autoComplete="new-password"
+              value={password}
+              onChange={setPassword}
+            />
+            <PasswordField
+              label="Confirm password"
+              minLength={MIN_LENGTH}
+              autoComplete="new-password"
+              value={confirm}
+              onChange={setConfirm}
+            />
             {error && <Alert tone="error">{error}</Alert>}
             <button type="submit" disabled={submitting} className={`${btnPrimaryClass} mt-2.5 h-[54px] text-base`}>
               {submitting ? 'Updating…' : 'Update password'}

@@ -1,6 +1,5 @@
 import { useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
 import { CalendarIcon, DumbbellIcon, PlusIcon, TrendIcon } from './icons'
 import { ProfileMenu } from './ProfileMenu'
 import { ThemeMenu } from './ThemeMenu'
@@ -57,12 +56,10 @@ function useSlidingHighlight(containerRef: RefObject<HTMLElement | null>, target
 }
 
 export function Nav() {
-  const { session } = useAuth()
-  const isAdmin = session?.user.email === import.meta.env.VITE_ADMIN_EMAIL
   const location = useLocation()
 
   const linksRef = useRef<HTMLDivElement>(null)
-  const highlight = useSlidingHighlight(linksRef, '[aria-current="page"]', [location.pathname, isAdmin])
+  const highlight = useSlidingHighlight(linksRef, '[aria-current="page"]', [location.pathname])
 
   const tabsRef = useRef<HTMLDivElement>(null)
   const tabHighlight = useSlidingHighlight(tabsRef, '[aria-current="page"] [data-pill]', [location.pathname])
@@ -89,11 +86,6 @@ export function Nav() {
                   {link.label}
                 </NavLink>
               ))}
-              {isAdmin && (
-                <NavLink to="/admin" className={linkClass}>
-                  Admin
-                </NavLink>
-              )}
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">

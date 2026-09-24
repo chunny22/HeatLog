@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import { Alert } from '../components/Alert'
 import { MeasureField } from '../components/MeasureField'
+import { PasswordField } from '../components/PasswordField'
 import { ArrowLeftIcon, CheckIcon, DumbbellIcon } from '../components/icons'
 import { btnPrimaryClass, chipClass, fieldClass, labelClass, segmentClass, segmentedClass } from '../components/ui'
 import { GOALS } from '../data/goals'
@@ -44,6 +45,7 @@ export function AuthPage() {
   const [goals, setGoals] = useState<FitnessGoal[]>([])
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [emailTaken, setEmailTaken] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   const cardRef = useRef<HTMLDivElement>(null)
@@ -98,6 +100,7 @@ export function AuthPage() {
     if (next !== 'reset') setActiveTab(next)
     setError(null)
     setMessage(null)
+    setEmailTaken(false)
 
     const card = cardRef.current
     if (card) {
@@ -114,6 +117,7 @@ export function AuthPage() {
     e.preventDefault()
     setError(null)
     setMessage(null)
+    setEmailTaken(false)
 
     if (mode === 'sign-up' && goals.length === 0) {
       setError('Please select at least one goal.')
@@ -137,7 +141,9 @@ export function AuthPage() {
             goals,
           })
 
-    if (result.error) {
+    if (result.emailTaken) {
+      setEmailTaken(true)
+    } else if (result.error) {
       setError(result.error)
     } else if (mode === 'sign-up') {
       setMessage('Account created. Check your email to confirm, then sign in.')
@@ -206,18 +212,13 @@ export function AuthPage() {
               />
             </label>
             {mode !== 'reset' && (
-            <label className={labelClass}>
-              Password
-              <input
-                type="password"
-                required
+              <PasswordField
+                label="Password"
                 minLength={6}
                 autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={fieldClass}
+                onChange={setPassword}
               />
-            </label>
             )}
 
             {mode === 'sign-in' && (
@@ -307,6 +308,19 @@ export function AuthPage() {
             )}
           </div>
 
+          {emailTaken && (
+            <Alert tone="error">
+              An account with this email already exists.
+              <span className="mt-1.5 flex gap-4 text-[13px] font-extrabold">
+                <button type="button" onClick={() => switchMode('sign-in')} className="underline underline-offset-4">
+                  Sign in instead
+                </button>
+                <button type="button" onClick={() => switchMode('reset')} className="underline underline-offset-4">
+                  Reset password
+                </button>
+              </span>
+            </Alert>
+          )}
           {error && <Alert tone="error">{error}</Alert>}
           {message && <Alert tone="success">{message}</Alert>}
 

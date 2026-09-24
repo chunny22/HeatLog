@@ -81,7 +81,7 @@ export function ProfileMenu() {
             Edit profile
           </Link>
           {isAdmin && (
-            <Link to="/admin" role="menuitem" onClick={() => setOpen(false)} className={`${itemClass} sm:hidden`}>
+            <Link to="/admin" role="menuitem" onClick={() => setOpen(false)} className={itemClass}>
               <LockIcon className="text-ink-3" />
               Admin
             </Link>
