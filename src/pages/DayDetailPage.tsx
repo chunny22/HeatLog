@@ -5,9 +5,10 @@ import { BodyMapBack } from '../components/bodymap/BodyMapBack'
 import { BodyMapFront } from '../components/bodymap/BodyMapFront'
 import { IntensityLegend } from '../components/bodymap/IntensityLegend'
 import { DayDetailPanel } from '../components/calendar/DayDetailPanel'
-import { DayInsightBar } from '../components/DayInsightBar'
+import { CoachButton, DayInsightBar } from '../components/DayInsightBar'
 import { ArrowLeftIcon } from '../components/icons'
 import { cardClass, cardTitleClass, pageClass, pageTitleClass, panelClass } from '../components/ui'
+import { useCoachPreference } from '../hooks/useCoachPreference'
 import { useDayInsight } from '../hooks/useDayInsight'
 import { useMuscleVolume } from '../hooks/useMuscleVolume'
 import { useProfile } from '../profile/ProfileContext'
@@ -20,6 +21,7 @@ export function DayDetailPage() {
   const { date } = useParams<{ date: string }>()
   const { sessions, loading, error, deleteSession } = useSessions()
   const { profile } = useProfile()
+  const { hidden: coachHidden, hide: hideCoach, show: showCoach } = useCoachPreference()
 
   const daySessions = useMemo(() => sessions.filter((s) => s.date === date), [sessions, date])
   const { normalized, raw } = useMuscleVolume(sessions, date, date)
@@ -28,7 +30,7 @@ export function DayDetailPage() {
     loading: insightLoading,
     error: insightError,
     regenerate,
-  } = useDayInsight(date ?? '', daySessions, profile?.goals ?? DEFAULT_GOALS)
+  } = useDayInsight(date ?? '', daySessions, profile?.goals ?? DEFAULT_GOALS, !coachHidden)
 
   if (!date) return null
 
@@ -78,7 +80,17 @@ export function DayDetailPage() {
       <DayDetailPanel date={date} sessions={daySessions} onDeleteSession={deleteSession} />
 
       {daySessions.length > 0 ? (
-        <DayInsightBar insight={insight} loading={insightLoading} error={insightError} onRegenerate={regenerate} />
+        coachHidden ? (
+          <CoachButton onShow={showCoach} />
+        ) : (
+          <DayInsightBar
+            insight={insight}
+            loading={insightLoading}
+            error={insightError}
+            onRegenerate={regenerate}
+            onHide={hideCoach}
+          />
+        )
       ) : (
         <p className="text-center text-[13px] text-muted">Log a workout to get AI coaching feedback.</p>
       )}

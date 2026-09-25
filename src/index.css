@@ -190,6 +190,27 @@ body {
   animation: dialog-card-out 150ms ease-in forwards;
 }
 
+@keyframes coach-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-coach-in {
+  animation: coach-in 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-coach-in {
+    animation: none;
+  }
+}
+
 @keyframes auth-extra-in {
   from {
     opacity: 0;

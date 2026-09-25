@@ -9,7 +9,9 @@ interface DayInsightRow {
   sessions_fingerprint: string
 }
 
-export function useDayInsight(date: string, sessions: WorkoutSession[], goals: FitnessGoal[]) {
+// `enabled` is false while the user has the AI Coach hidden: nothing is fetched or
+// generated then, so a hidden coach costs no AI requests.
+export function useDayInsight(date: string, sessions: WorkoutSession[], goals: FitnessGoal[], enabled = true) {
   const [insight, setInsight] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -63,7 +65,7 @@ export function useDayInsight(date: string, sessions: WorkoutSession[], goals: F
   }, [date, fingerprint, goalsKey])
 
   useEffect(() => {
-    if (!ready) return
+    if (!ready || !enabled) return
     let cancelled = false
 
     async function load() {
@@ -105,7 +107,7 @@ export function useDayInsight(date: string, sessions: WorkoutSession[], goals: F
     // whenever sessions does (including becoming/leaving empty), so this only
     // re-runs on an actual content change, not a same-content re-render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date, fingerprint, generate, ready])
+  }, [date, fingerprint, generate, ready, enabled])
 
   return { insight, loading, error, regenerate: generate }
 }

@@ -130,6 +130,12 @@ export const PencilIcon = (p: IconProps) => (
     <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
   </Icon>
 )
+export const SparkleIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" />
+    <path d="M19 16v4M17 18h4" />
+  </Icon>
+)
 export const TrendIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="M3 17l6-6 4 4 8-8M15 7h6v6" />
