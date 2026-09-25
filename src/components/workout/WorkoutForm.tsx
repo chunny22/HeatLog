@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { EXERCISES_BY_ID } from '../../data/exercises'
+import { useExercises } from '../../exercises/ExerciseContext'
 import type { Exercise, SetEntry, WorkoutEntry, WorkoutSession, WorkoutStatus } from '../../types'
 import { Alert } from '../Alert'
 import { CalendarIcon, PlusIcon, TrashIcon } from '../icons'
@@ -28,6 +28,7 @@ interface WorkoutFormProps {
 
 export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFormProps) {
   const { profile } = useProfile()
+  const { exercisesById } = useExercises()
   const defaultUnit = profile?.unitPreference ?? 'lb'
   const blankSet = (unit: SetEntry['unit'] = defaultUnit): SetEntry => ({ reps: 0, weight: 0, unit })
   const [status, setStatus] = useState<WorkoutStatus>('planned')
@@ -110,7 +111,7 @@ export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFor
       <ExercisePicker onAdd={addExercise} addedIds={entries.map((e) => e.exerciseId)} />
 
       {entries.map((entry) => {
-        const exercise = EXERCISES_BY_ID[entry.exerciseId]
+        const exercise = exercisesById[entry.exerciseId]
         return (
           <section key={entry.exerciseId} className={`${cardClass} flex flex-col gap-3.5`}>
             <div className="flex items-center justify-between gap-3">

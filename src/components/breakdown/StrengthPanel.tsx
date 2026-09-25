@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { EXERCISES_BY_ID } from '../../data/exercises'
+import { useExercises } from '../../exercises/ExerciseContext'
 import type { WeightUnit, WorkoutSession } from '../../types'
 import { exercisesWithHistory, strengthSeries } from '../../utils/progress'
 import { ChevronDownIcon } from '../icons'
@@ -15,6 +15,7 @@ function formatDate(iso: string): string {
 }
 
 export function StrengthPanel({ sessions, unit }: { sessions: WorkoutSession[]; unit: WeightUnit }) {
+  const { exercisesById } = useExercises()
   const exerciseIds = useMemo(() => exercisesWithHistory(sessions), [sessions])
   const [picked, setPicked] = useState<string | null>(null)
   const [range, setRange] = useState<Range>('90d')
@@ -54,7 +55,7 @@ export function StrengthPanel({ sessions, unit }: { sessions: WorkoutSession[]; 
           >
             {exerciseIds.map((id) => (
               <option key={id} value={id}>
-                {EXERCISES_BY_ID[id]?.name ?? id}
+                {exercisesById[id]?.name ?? id}
               </option>
             ))}
           </select>

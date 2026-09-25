@@ -17,6 +17,8 @@ interface ExerciseSummary {
   name: string
   category: string
   muscles: string[]
+  // Average RPE (1-10) across the day's sets for this exercise; absent/null if unrated.
+  avgRpe?: number | null
 }
 
 interface RequestBody {
@@ -48,7 +50,10 @@ Deno.serve(async (req) => {
       (g) => GOAL_LABELS[g] ?? 'general fitness',
     )
     const exerciseList = exercises
-      .map((e) => `- ${e.name} (${e.category}; targets: ${e.muscles.join(', ')})`)
+      .map((e) => {
+        const effort = typeof e.avgRpe === 'number' ? `; average effort RPE ${e.avgRpe}/10` : ''
+        return `- ${e.name} (${e.category}; targets: ${e.muscles.join(', ')}${effort})`
+      })
       .join('\n')
 
     const prompt = `You are a friendly, encouraging personal trainer reviewing a single day of a client's workout log.
@@ -58,7 +63,7 @@ Client's goals: ${goalLabels.join(' and ')}.
 Today's exercises:
 ${exerciseList}
 
-In 1-2 short sentences (max ~40 words total), tell the client whether today's workout adequately covers their goals, and briefly name anything obviously missing (e.g. a muscle group or training type left uncovered). If they have multiple goals, weigh the tradeoffs briefly rather than listing each separately. Be specific but concise. Casual, encouraging tone. Do not use markdown, headers, or bullet points — plain sentences only.`
+In 1-2 short sentences (max ~45 words total), tell the client whether today's workout adequately covers their goals, and briefly name anything obviously missing (e.g. a muscle group or training type left uncovered). If they have multiple goals, weigh the tradeoffs briefly rather than listing each separately. Where an RPE is given (rate of perceived exertion, 1-10, where 10 is maximal effort), you may briefly say whether the effort suits their goals, for example hard sets for strength or muscle building versus easier sets for recovery or general fitness. Only mention effort when RPE is provided. Be specific but concise. Casual, encouraging tone. Do not use markdown, headers, or bullet points — plain sentences only.`
 
     const apiKey = Deno.env.get('GEMINI_API_KEY')
     if (!apiKey) {

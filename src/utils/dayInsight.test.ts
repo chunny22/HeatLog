@@ -53,3 +53,49 @@ describe('buildDaySummary', () => {
     expect(new Set(summary[0].muscles).size).toBe(summary[0].muscles.length)
   })
 })
+
+describe('buildDaySummary with custom exercises', () => {
+  it('describes a custom exercise to the AI coach with its own muscles', () => {
+    const summary = buildDaySummary([make('1', 'completed', ['custom-1'])], {
+      'custom-1': {
+        id: 'custom-1',
+        name: 'Sled push',
+        category: 'legs',
+        muscles: [
+          { group: 'quads', role: 'primary' },
+          { group: 'glutes', role: 'secondary' },
+        ],
+      },
+    })
+    expect(summary).toEqual([{ name: 'Sled push', category: 'legs', muscles: ['Quads', 'Glutes'], avgRpe: null }])
+  })
+})
+
+describe('buildDaySummary RPE', () => {
+  const rated = (id: string, rpes: (number | undefined)[]): WorkoutSession => ({
+    id,
+    date: '2026-09-01',
+    status: 'completed',
+    entries: [
+      {
+        exerciseId: 'barbell-bench-press',
+        sets: rpes.map((intensity) => ({ reps: 5, weight: 100, unit: 'lb' as const, intensity })),
+      },
+    ],
+  })
+
+  it('averages the RPE of an exercise\'s rated sets', () => {
+    const [bench] = buildDaySummary([rated('1', [7, 8, 9])])
+    expect(bench.avgRpe).toBe(8)
+  })
+
+  it('rounds to one decimal and pools sets across sessions', () => {
+    const [bench] = buildDaySummary([rated('1', [8, 9]), rated('2', [9])])
+    expect(bench.avgRpe).toBe(8.7)
+  })
+
+  it('ignores sets with no RPE, and is null when none were rated', () => {
+    expect(buildDaySummary([rated('1', [8, undefined, 0])])[0].avgRpe).toBe(8)
+    expect(buildDaySummary([rated('1', [undefined, undefined])])[0].avgRpe).toBeNull()
+  })
+})

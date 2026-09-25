@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
-import { EXERCISES } from '../../data/exercises'
+import { useExercises } from '../../exercises/ExerciseContext'
 import type { Exercise, ExerciseCategory } from '../../types'
+import { isCustomExerciseId } from '../../utils/customExercise'
 import { CheckIcon, PlusIcon, SearchIcon } from '../icons'
 import { cardClass, cardTitleClass, chipClass } from '../ui'
+import { ExerciseForm } from './ExerciseForm'
 
 const CATEGORIES: (ExerciseCategory | 'all')[] = ['all', 'push', 'pull', 'legs', 'core', 'cardio']
 
@@ -14,14 +16,39 @@ interface ExercisePickerProps {
 export function ExercisePicker({ onAdd, addedIds = [] }: ExercisePickerProps) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<ExerciseCategory | 'all'>('all')
+  const { exercises, addCustom } = useExercises()
+  // Set while the "add your own" form is open; holds the name to start it with.
+  const [creating, setCreating] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
-    return EXERCISES.filter((exercise) => {
+    return exercises.filter((exercise) => {
       const matchesQuery = exercise.name.toLowerCase().includes(query.toLowerCase())
       const matchesCategory = category === 'all' || exercise.category === category
       return matchesQuery && matchesCategory
     })
-  }, [query, category])
+  }, [exercises, query, category])
+
+  if (creating !== null) {
+    return (
+      <section className={`${cardClass} flex flex-col gap-4`}>
+        <ExerciseForm
+          title="New exercise"
+          submitLabel="Save and add to workout"
+          initial={{ name: creating, category: category === 'all' ? 'push' : category, muscles: [] }}
+          onSubmit={async (input) => {
+            const result = await addCustom(input)
+            if (result.exercise) {
+              onAdd(result.exercise)
+              setCreating(null)
+              setQuery('')
+            }
+            return { error: result.error }
+          }}
+          onCancel={() => setCreating(null)}
+        />
+      </section>
+    )
+  }
 
   return (
     <section className={`${cardClass} flex flex-col gap-4`}>
@@ -62,6 +89,9 @@ export function ExercisePicker({ onAdd, addedIds = [] }: ExercisePickerProps) {
               }`}
             >
               <span className="flex-1 text-[15px] font-semibold text-ink">{exercise.name}</span>
+              {isCustomExerciseId(exercise.id) && (
+                <span className="rounded-full bg-accent-soft px-2.5 py-0.5 text-xs font-semibold text-accent-ink">Yours</span>
+              )}
               <span className="rounded-full bg-sunken px-2.5 py-0.5 text-xs font-semibold text-ink-3 capitalize">
                 {exercise.category}
               </span>
@@ -77,6 +107,18 @@ export function ExercisePicker({ onAdd, addedIds = [] }: ExercisePickerProps) {
         })}
         {filtered.length === 0 && <p className="px-2 py-4 text-center text-sm text-muted">No matches.</p>}
       </div>
+      <button
+        type="button"
+        onClick={() => setCreating(query.trim())}
+        className="flex min-h-[54px] items-center gap-3 rounded-[18px] border-2 border-dashed border-accent px-4 py-2 text-left text-[15px] font-bold text-accent-ink transition-colors hover:bg-accent-soft"
+      >
+        <span className="flex size-[30px] shrink-0 items-center justify-center rounded-full bg-accent text-white">
+          <PlusIcon size={16} strokeWidth={2.5} />
+        </span>
+        <span className="min-w-0 break-words">
+          {query.trim() && filtered.length === 0 ? `Add "${query.trim()}" as your own exercise` : 'Add your own exercise'}
+        </span>
+      </button>
     </section>
   )
 }

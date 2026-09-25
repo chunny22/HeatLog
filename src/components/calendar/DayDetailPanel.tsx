@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { EXERCISES_BY_ID } from '../../data/exercises'
+import { useExercises } from '../../exercises/ExerciseContext'
 import { useConfirm } from '../../hooks/useConfirm'
 import type { WorkoutSession } from '../../types'
 import { CheckIcon, ClockIcon, PlusIcon, TrashIcon } from '../icons'
@@ -18,6 +18,7 @@ function formatSet(set: WorkoutSession['entries'][number]['sets'][number]) {
 
 export function DayDetailPanel({ date, sessions, onDeleteSession }: DayDetailPanelProps) {
   const { confirm, dialog } = useConfirm()
+  const { exercisesById } = useExercises()
 
   return (
     <section className={`${cardClass} flex flex-col gap-4`}>
@@ -59,7 +60,7 @@ export function DayDetailPanel({ date, sessions, onDeleteSession }: DayDetailPan
               <button
                 onClick={async () => {
                   const names = session.entries
-                    .map((e) => EXERCISES_BY_ID[e.exerciseId]?.name ?? e.exerciseId)
+                    .map((e) => exercisesById[e.exerciseId]?.name ?? e.exerciseId)
                     .join(', ')
                   if (await confirm(`Delete this workout (${names || date})? This cannot be undone.`)) {
                     onDeleteSession(session.id)
@@ -75,7 +76,7 @@ export function DayDetailPanel({ date, sessions, onDeleteSession }: DayDetailPan
           </div>
           <ul className="flex flex-col gap-2.5">
             {session.entries.map((entry, i) => {
-              const exercise = EXERCISES_BY_ID[entry.exerciseId]
+              const exercise = exercisesById[entry.exerciseId]
               return (
                 <li
                   key={i}

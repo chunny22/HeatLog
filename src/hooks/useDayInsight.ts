@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../supabase'
 import type { FitnessGoal, WorkoutSession } from '../types'
+import { useExercises } from '../exercises/ExerciseContext'
 import { buildDaySummary, fingerprintSessions } from '../utils/dayInsight'
 
 interface DayInsightRow {
@@ -12,6 +13,15 @@ export function useDayInsight(date: string, sessions: WorkoutSession[], goals: F
   const [insight, setInsight] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Custom exercises load after sign-in. Wait for them before generating, so the
+  // AI never sees a day with an exercise missing, and read the lookup through a
+  // ref so it loading doesn't itself count as "the data changed" and re-run.
+  const { exercisesById, ready } = useExercises()
+  const exercisesRef = useRef(exercisesById)
+  useEffect(() => {
+    exercisesRef.current = exercisesById
+  }, [exercisesById])
 
   // Derive stable primitive keys from `sessions`/`goals` so a caller passing
   // a new-but-equal array/object each render (e.g. `profile?.goals ?? [...]`)
@@ -26,7 +36,7 @@ export function useDayInsight(date: string, sessions: WorkoutSession[], goals: F
     setError(null)
 
     const { data: fnData, error: fnError } = await supabase.functions.invoke('day-insight', {
-      body: { goals, exercises: buildDaySummary(sessions) },
+      body: { goals, exercises: buildDaySummary(sessions, exercisesRef.current) },
     })
 
     if (fnError || !fnData?.insight) {
@@ -53,6 +63,7 @@ export function useDayInsight(date: string, sessions: WorkoutSession[], goals: F
   }, [date, fingerprint, goalsKey])
 
   useEffect(() => {
+    if (!ready) return
     let cancelled = false
 
     async function load() {
@@ -94,7 +105,7 @@ export function useDayInsight(date: string, sessions: WorkoutSession[], goals: F
     // whenever sessions does (including becoming/leaving empty), so this only
     // re-runs on an actual content change, not a same-content re-render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date, fingerprint, generate])
+  }, [date, fingerprint, generate, ready])
 
   return { insight, loading, error, regenerate: generate }
 }

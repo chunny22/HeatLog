@@ -181,3 +181,45 @@ create policy "Users manage their own weight logs"
   for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- Exercises users add themselves, on top of the built-in list in
+-- src/data/exercises.ts. `muscles` is [{ "group": "quads", "role": "primary" }, ...]
+-- (same shape as the built-ins) so the heatmap and AI coach treat them alike.
+-- Removing one only sets `archived`, so old workouts keep resolving its name.
+create table if not exists custom_exercises (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users on delete cascade,
+  name text not null check (length(btrim(name)) between 1 and 60),
+  category text not null check (category in ('push', 'pull', 'legs', 'core', 'cardio')),
+  muscles jsonb not null default '[]'::jsonb check (jsonb_typeof(muscles) = 'array'),
+  archived boolean not null default false,
+  created_at timestamptz default now()
+);
+
+-- One active exercise per name per user (case-insensitive).
+create unique index if not exists custom_exercises_user_name_idx
+  on custom_exercises (user_id, lower(btrim(name))) where not archived;
+
+alter table custom_exercises enable row level security;
+
+drop policy if exists "Users read their own custom exercises" on custom_exercises;
+create policy "Users read their own custom exercises"
+  on custom_exercises for select using (auth.uid() = user_id);
+
+-- Capped at 100 per user so one account can't fill the table.
+drop policy if exists "Users add their own custom exercises" on custom_exercises;
+create policy "Users add their own custom exercises"
+  on custom_exercises for insert
+  with check (
+    auth.uid() = user_id
+    and (select count(*) from custom_exercises where user_id = auth.uid()) < 100
+  );
+
+drop policy if exists "Users edit their own custom exercises" on custom_exercises;
+create policy "Users edit their own custom exercises"
+  on custom_exercises for update
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "Users delete their own custom exercises" on custom_exercises;
+create policy "Users delete their own custom exercises"
+  on custom_exercises for delete using (auth.uid() = user_id);

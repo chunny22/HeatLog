@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Alert } from '../components/Alert'
+import { CustomExercisesCard } from '../components/CustomExercisesCard'
 import { CheckIcon } from '../components/icons'
 import { MeasureField } from '../components/MeasureField'
 import {
@@ -180,6 +181,8 @@ export function ProfilePage() {
               {savingGoals ? 'Saving…' : 'Save goals'}
             </button>
           </form>
+
+          <CustomExercisesCard />
         </>
       )}
     </div>

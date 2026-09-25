@@ -60,6 +60,9 @@ export function DayDetailPage() {
           <h2 className={cardTitleClass}>Muscles worked</h2>
           <IntensityLegend />
         </div>
+        <p className="-mt-2 text-xs text-muted">
+          Colour follows volume (reps × weight), adjusted for how hard each set felt when you logged its RPE.
+        </p>
         <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <div className={`${panelClass} flex flex-col items-center gap-3`}>
             <BodyMapFront normalized={normalized} raw={raw} />

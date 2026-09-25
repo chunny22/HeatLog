@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { SetEntry, WorkoutSession } from '../types'
-import { computeMuscleVolume, normalizeVolumes, setVolume } from './muscleVolume'
+import { computeMuscleVolume, normalizeVolumes, rpeFactor, setVolume } from './muscleVolume'
 
 const set = (reps: number, weight: number): SetEntry => ({ reps, weight, unit: 'lb' })
 const session = (
@@ -75,5 +75,70 @@ describe('normalizeVolumes', () => {
   it('returns all zeros untouched (no divide by zero)', () => {
     const n = normalizeVolumes(computeMuscleVolume([]))
     expect(Object.values(n).every((x) => x === 0)).toBe(true)
+  })
+})
+
+describe('computeMuscleVolume with custom exercises', () => {
+  const sledPush = {
+    id: 'custom-1',
+    name: 'Sled push',
+    category: 'legs' as const,
+    muscles: [
+      { group: 'quads' as const, role: 'primary' as const },
+      { group: 'glutes' as const, role: 'secondary' as const },
+    ],
+  }
+
+  it('counts a custom exercise using the muscles its owner chose', () => {
+    const v = computeMuscleVolume(
+      [session('2026-09-01', 'completed', 'custom-1', [set(2, 100)])],
+      undefined,
+      undefined,
+      { 'custom-1': sledPush },
+    )
+    expect(v.quads).toBe(200)
+    expect(v.glutes).toBe(100)
+    expect(v.chest).toBe(0)
+  })
+
+  it('skips a custom id it has no definition for', () => {
+    const v = computeMuscleVolume([session('2026-09-01', 'completed', 'custom-1', [set(2, 100)])])
+    expect(Object.values(v).every((x) => x === 0)).toBe(true)
+  })
+})
+
+describe('rpeFactor', () => {
+  it('treats RPE 8 as normal and each point as 10%', () => {
+    expect(rpeFactor(8)).toBe(1)
+    expect(rpeFactor(10)).toBeCloseTo(1.2, 10)
+    expect(rpeFactor(6)).toBeCloseTo(0.8, 10)
+    expect(rpeFactor(1)).toBeCloseTo(0.3, 10)
+  })
+
+  it('is neutral when there is no RPE', () => {
+    expect(rpeFactor(undefined)).toBe(1)
+    expect(rpeFactor(0)).toBe(1)
+    expect(rpeFactor(NaN)).toBe(1)
+  })
+
+  it('keeps out-of-range values inside 1-10', () => {
+    expect(rpeFactor(15)).toBeCloseTo(1.2, 10)
+  })
+})
+
+describe('computeMuscleVolume with RPE', () => {
+  const bench = 'barbell-bench-press'
+  const rated = (rpe: number | undefined): SetEntry => ({ reps: 5, weight: 100, unit: 'lb', intensity: rpe })
+  const chest = (sets: SetEntry[]) =>
+    computeMuscleVolume([session('2026-09-01', 'completed', bench, sets)]).chest
+
+  it('counts a harder set for more than an easier one with the same reps and weight', () => {
+    expect(chest([rated(10)])).toBeCloseTo(600, 6)
+    expect(chest([rated(6)])).toBeCloseTo(400, 6)
+    expect(chest([rated(8)])).toBe(500)
+  })
+
+  it('leaves sets without an RPE unchanged', () => {
+    expect(chest([rated(undefined)])).toBe(500)
   })
 })

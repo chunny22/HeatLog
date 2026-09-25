@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { EXERCISES_BY_ID } from '../data/exercises'
+import { useExercises } from '../exercises/ExerciseContext'
 import { Alert } from '../components/Alert'
 import { btnPrimaryClass, cardClass, cardTitleClass, pageClass, pageTitleClass } from '../components/ui'
 import { SetRow, SetRowHeader } from '../components/workout/SetRow'
@@ -11,6 +11,7 @@ export function CompleteWorkoutPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { sessions, loading, completeSession } = useSessions()
+  const { exercisesById } = useExercises()
   const session = sessions.find((s) => s.id === id)
 
   const [entries, setEntries] = useState<WorkoutEntry[]>([])
@@ -56,7 +57,7 @@ export function CompleteWorkoutPage() {
       </div>
 
       {entries.map((entry) => {
-        const exercise = EXERCISES_BY_ID[entry.exerciseId]
+        const exercise = exercisesById[entry.exerciseId]
         return (
           <section key={entry.exerciseId} className={`${cardClass} flex flex-col gap-3.5`}>
             <h2 className={cardTitleClass}>{exercise?.name}</h2>

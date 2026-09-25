@@ -125,6 +125,11 @@ export const EyeOffIcon = (p: IconProps) => (
     <path d="M14.1 14.1a3 3 0 1 1-4.2-4.2" />
   </Icon>
 )
+export const PencilIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+  </Icon>
+)
 export const TrendIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="M3 17l6-6 4 4 8-8M15 7h6v6" />
