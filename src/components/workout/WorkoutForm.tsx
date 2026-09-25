@@ -51,6 +51,15 @@ export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFor
     setEntries(entries.map((e) => (e.exerciseId === exerciseId ? { ...e, sets } : e)))
   }
 
+  const addSet = (exerciseId: string) => {
+    setEntries((current) => current.map((entry) => {
+      if (entry.exerciseId !== exerciseId) return entry
+      // Carry forward the latest values, but rate each set's effort separately.
+      const { reps, weight, unit } = entry.sets.at(-1) ?? blankSet()
+      return { ...entry, sets: [...entry.sets, { reps, weight, unit }] }
+    }))
+  }
+
   const handleSave = async () => {
     if (entries.length === 0) return
     setSaving(true)
@@ -147,7 +156,7 @@ export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFor
               />
             ))}
             <button
-              onClick={() => updateSets(entry.exerciseId, [...entry.sets, blankSet(entry.sets[entry.sets.length - 1]?.unit)])}
+              onClick={() => addSet(entry.exerciseId)}
               className={`${btnSoftSmClass} self-start pl-3`}
             >
               <PlusIcon size={16} />

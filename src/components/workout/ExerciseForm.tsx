@@ -106,9 +106,6 @@ export function ExerciseForm({ title, submitLabel, initial, excludeId, onSubmit,
             Tap the muscles it works. Tap again to clear.
             {category === 'cardio' && ' Optional for cardio.'}
           </span>
-          <span className="text-xs font-medium text-ink-3">
-            For chest exercises, select upper, mid, lower, or any combination. Incline presses emphasize the upper chest.
-          </span>
         </div>
         {MUSCLE_SECTIONS.map((section) => (
           <div key={section.title} className="flex flex-col gap-2">
