@@ -18,7 +18,7 @@ export function useDayInsight(date: string, sessions: WorkoutSession[], goals: F
 
   // Custom exercises load after sign-in. Wait for them before generating, so the
   // AI never sees a day with an exercise missing, and read the lookup through a
-  // ref so it loading doesn't itself count as "the data changed" and re-run.
+  // ref; the fingerprint below captures changes to exercises used on this day.
   const { exercisesById, ready } = useExercises()
   const exercisesRef = useRef(exercisesById)
   useEffect(() => {
@@ -30,7 +30,7 @@ export function useDayInsight(date: string, sessions: WorkoutSession[], goals: F
   // doesn't look like "the data changed" to useCallback/useEffect -- only an
   // actual content change (a workout added/removed, or a different goal set)
   // should re-trigger a fetch-or-generate cycle.
-  const fingerprint = useMemo(() => fingerprintSessions(sessions), [sessions])
+  const fingerprint = useMemo(() => fingerprintSessions(sessions, exercisesById), [sessions, exercisesById])
   const goalsKey = useMemo(() => [...goals].sort().join(','), [goals])
 
   const generate = useCallback(async () => {

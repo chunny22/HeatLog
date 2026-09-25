@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { WorkoutSession } from '../types'
+import type { Exercise, WorkoutSession } from '../types'
 import { buildDaySummary, fingerprintSessions } from './dayInsight'
 
 const make = (id: string, status: WorkoutSession['status'], exerciseIds: string[], reps = 5): WorkoutSession => ({
@@ -10,6 +10,27 @@ const make = (id: string, status: WorkoutSession['status'], exerciseIds: string[
 })
 
 describe('fingerprintSessions', () => {
+  it('invalidates cached coaching when a custom exercise changes chest regions', () => {
+    const sessions = [make('1', 'completed', ['custom-chest'])]
+    const upper: Exercise = { id: 'custom-chest', name: 'Press', category: 'push', muscles: [{ group: 'upper_chest', role: 'primary' }] }
+    const lower: Exercise = { ...upper, muscles: [{ group: 'lower_chest', role: 'primary' }] }
+    expect(fingerprintSessions(sessions, { 'custom-chest': upper })).not.toBe(
+      fingerprintSessions(sessions, { 'custom-chest': lower }),
+    )
+    expect(buildDaySummary(sessions, { 'custom-chest': upper })[0].muscles).toEqual(['Upper Chest'])
+    expect(buildDaySummary(sessions, { 'custom-chest': lower })[0].muscles).toEqual(['Lower Chest'])
+  })
+
+  it('keeps cached coaching when muscle order or an unrelated exercise changes', () => {
+    const sessions = [make('1', 'completed', ['custom-chest'])]
+    const chest: Exercise = { id: 'custom-chest', name: 'Press', category: 'push', muscles: [
+      { group: 'upper_chest', role: 'primary' }, { group: 'lower_chest', role: 'secondary' },
+    ] }
+    expect(fingerprintSessions(sessions, { 'custom-chest': chest })).toBe(
+      fingerprintSessions(sessions, { 'custom-chest': { ...chest, muscles: [...chest.muscles].reverse() }, unused: { ...chest, name: 'Unused' } }),
+    )
+  })
+
   it('is the same regardless of session or exercise order', () => {
     const a = fingerprintSessions([make('1', 'completed', ['x', 'y']), make('2', 'planned', ['z'])])
     const b = fingerprintSessions([make('2', 'planned', ['z']), make('1', 'completed', ['y', 'x'])])

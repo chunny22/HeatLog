@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ALL_MUSCLES } from '../data/muscles'
+import { ALL_MUSCLES, expandLegacyChest } from '../data/muscles'
 import {
   fromCustomExerciseId,
   isCustomExerciseId,
@@ -30,6 +30,15 @@ describe('nextMuscleRole', () => {
 })
 
 describe('selection <-> muscles', () => {
+  it('loads old chest targets as three editable selections and saves the regional format', () => {
+    const selection = musclesToSelection(expandLegacyChest([{ group: 'chest', role: 'secondary' }]))
+    expect(selection).toEqual({ upper_chest: 'secondary', mid_chest: 'secondary', lower_chest: 'secondary' })
+    delete selection.upper_chest
+    delete selection.lower_chest
+    selection.mid_chest = 'primary'
+    expect(selectionToMuscles(selection)).toEqual([{ group: 'mid_chest', role: 'primary' }])
+  })
+
   it('lists main muscles first', () => {
     const muscles = selectionToMuscles({ hamstrings: 'secondary', quads: 'primary', glutes: 'primary' })
     expect(muscles.map((m) => m.role)).toEqual(['primary', 'primary', 'secondary'])

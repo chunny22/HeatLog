@@ -1,8 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { EXERCISES } from '../data/exercises'
+import { expandLegacyChest } from '../data/muscles'
 import { supabase } from '../supabase'
-import type { Exercise, ExerciseCategory } from '../types'
+import type { Exercise, ExerciseCategory, StoredMuscleTarget } from '../types'
 import { normalizeName, toCustomExerciseId, fromCustomExerciseId } from '../utils/customExercise'
 import { retryWhile } from '../utils/retry'
 
@@ -10,7 +11,7 @@ interface CustomExerciseRow {
   id: string
   name: string
   category: ExerciseCategory
-  muscles: Exercise['muscles']
+  muscles: StoredMuscleTarget[]
   archived: boolean
 }
 
@@ -46,7 +47,7 @@ const rowToExercise = (row: CustomExerciseRow): Exercise => ({
   id: toCustomExerciseId(row.id),
   name: row.name,
   category: row.category,
-  muscles: row.muscles,
+  muscles: expandLegacyChest(row.muscles),
 })
 
 function friendlyError(message: string, code?: string): string {

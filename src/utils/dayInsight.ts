@@ -48,15 +48,24 @@ export function buildDaySummary(
  * Deterministic fingerprint of which sessions/exercises make up a day, used to
  * detect whether a cached insight is stale. Deliberately ignores reps/weight/RPE
  * (tweaking a number doesn't change the "coverage" judgment), only session
- * identity/status and which exercises are present. RPE is only ever entered when
+ * identity/status and the definitions of the exercises present. RPE is only ever entered when
  * a session is completed, which already changes its status, so the coach's
  * comments on effort stay current without hashing the ratings.
  */
-export function fingerprintSessions(sessions: WorkoutSession[]): string {
+export function fingerprintSessions(
+  sessions: WorkoutSession[],
+  exercisesById: Record<string, Exercise> = EXERCISES_BY_ID,
+): string {
   return sessions
     .map((session) => {
       const exerciseIds = Array.from(new Set(session.entries.map((e) => e.exerciseId))).sort()
-      return `${session.id}:${session.status}:${exerciseIds.join(',')}`
+      const exercises = exerciseIds.map((id) => {
+        const exercise = exercisesById[id]
+        if (!exercise) return [id]
+        const muscles = exercise.muscles.map(({ group, role }) => `${group}:${role}`).sort()
+        return [id, exercise.name, exercise.category, muscles]
+      })
+      return `${session.id}:${session.status}:${JSON.stringify(exercises)}`
     })
     .sort()
     .join('|')

@@ -62,3 +62,9 @@ Once set up, that account sees an "Admin" link in the nav bar, and can sign in d
 - **Day page** — for a given date: a front/back body-map heatmap of which muscles that day's workouts hit, the list of planned/completed sessions, and an AI Coach comment on whether the day's training serves your goals.
 - **Progress** — three views: **Activity** ("Most Active Day" and "Least Active Day" stat tiles plus a 30-day training-volume line chart), **Strength** (per-exercise estimated 1RM trend, heaviest set and recent sessions) and **Body weight** (log weigh-ins and see the trend). Logging a workout also shows what you did "last time" for each exercise.
 - **Admin** (if configured) — a password-only login that lists every account and can delete one, including all of its data.
+
+### Chest regions
+
+Custom exercises can target **Upper Chest**, **Mid Chest**, **Lower Chest**, or any combination, and the front body map colours these regions separately. Flat presses cover all three regions; incline presses use primary upper-chest and secondary mid/lower-chest coverage. These are simplified training-emphasis labels using the app's existing primary/secondary weights, not measured activation percentages.
+
+Existing custom exercises saved with `chest` expand to all three regions when loaded, including archived exercises used in old workouts. Editing and saving them stores the specific regions. No database migration is required: custom muscle targets are stored as JSON. AI coaching caches also refresh when a day's exercise definitions change.

@@ -9,7 +9,7 @@ export const NAME_MAX = 60
 export const MUSCLE_SECTIONS: { title: string; muscles: MuscleGroup[] }[] = [
   {
     title: 'Upper body',
-    muscles: ['chest', 'front_delts', 'side_delts', 'rear_delts', 'lats', 'traps', 'upper_back', 'biceps', 'triceps', 'forearms'],
+    muscles: ['upper_chest', 'mid_chest', 'lower_chest', 'front_delts', 'side_delts', 'rear_delts', 'lats', 'traps', 'upper_back', 'biceps', 'triceps', 'forearms'],
   },
   { title: 'Core', muscles: ['abs', 'obliques', 'lower_back'] },
   { title: 'Lower body', muscles: ['quads', 'hamstrings', 'glutes', 'calves'] },

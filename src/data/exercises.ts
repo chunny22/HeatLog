@@ -5,14 +5,16 @@ const secondary = (group: Exercise['muscles'][number]['group']) => ({ group, rol
 
 export const EXERCISES: Exercise[] = [
   // Push
-  { id: 'barbell-bench-press', name: 'Barbell Bench Press', category: 'push', muscles: [primary('chest'), secondary('front_delts'), secondary('triceps')] },
-  { id: 'incline-bench-press', name: 'Incline Bench Press', category: 'push', muscles: [primary('chest'), primary('front_delts'), secondary('triceps')] },
-  { id: 'dumbbell-bench-press', name: 'Dumbbell Bench Press', category: 'push', muscles: [primary('chest'), secondary('front_delts'), secondary('triceps')] },
-  { id: 'incline-dumbbell-press', name: 'Incline Dumbbell Press', category: 'push', muscles: [primary('chest'), primary('front_delts'), secondary('triceps')] },
-  { id: 'push-up', name: 'Push-Up', category: 'push', muscles: [primary('chest'), secondary('front_delts'), secondary('triceps'), secondary('abs')] },
-  { id: 'dips', name: 'Dips', category: 'push', muscles: [primary('chest'), primary('triceps'), secondary('front_delts')] },
-  { id: 'cable-fly', name: 'Cable Fly', category: 'push', muscles: [primary('chest')] },
-  { id: 'pec-deck', name: 'Pec Deck', category: 'push', muscles: [primary('chest')] },
+  // Chest regions use the app's simplified primary/secondary weighting, not
+  // measured activation percentages. Flat presses cover all three; incline favors upper.
+  { id: 'barbell-bench-press', name: 'Barbell Bench Press', category: 'push', muscles: [primary('upper_chest'), primary('mid_chest'), primary('lower_chest'), secondary('front_delts'), secondary('triceps')] },
+  { id: 'incline-bench-press', name: 'Incline Bench Press', category: 'push', muscles: [primary('upper_chest'), secondary('mid_chest'), secondary('lower_chest'), primary('front_delts'), secondary('triceps')] },
+  { id: 'dumbbell-bench-press', name: 'Dumbbell Bench Press', category: 'push', muscles: [primary('upper_chest'), primary('mid_chest'), primary('lower_chest'), secondary('front_delts'), secondary('triceps')] },
+  { id: 'incline-dumbbell-press', name: 'Incline Dumbbell Press', category: 'push', muscles: [primary('upper_chest'), secondary('mid_chest'), secondary('lower_chest'), primary('front_delts'), secondary('triceps')] },
+  { id: 'push-up', name: 'Push-Up', category: 'push', muscles: [primary('upper_chest'), primary('mid_chest'), primary('lower_chest'), secondary('front_delts'), secondary('triceps'), secondary('abs')] },
+  { id: 'dips', name: 'Dips', category: 'push', muscles: [primary('upper_chest'), primary('mid_chest'), primary('lower_chest'), primary('triceps'), secondary('front_delts')] },
+  { id: 'cable-fly', name: 'Cable Fly', category: 'push', muscles: [primary('upper_chest'), primary('mid_chest'), primary('lower_chest')] },
+  { id: 'pec-deck', name: 'Pec Deck', category: 'push', muscles: [primary('upper_chest'), primary('mid_chest'), primary('lower_chest')] },
   { id: 'overhead-press', name: 'Overhead Press', category: 'push', muscles: [primary('front_delts'), secondary('side_delts'), secondary('triceps')] },
   { id: 'dumbbell-shoulder-press', name: 'Dumbbell Shoulder Press', category: 'push', muscles: [primary('front_delts'), secondary('side_delts'), secondary('triceps')] },
   { id: 'lateral-raise', name: 'Lateral Raise', category: 'push', muscles: [primary('side_delts')] },
@@ -21,7 +23,7 @@ export const EXERCISES: Exercise[] = [
   { id: 'tricep-pushdown', name: 'Tricep Pushdown', category: 'push', muscles: [primary('triceps')] },
   { id: 'skull-crushers', name: 'Skull Crushers', category: 'push', muscles: [primary('triceps')] },
   { id: 'overhead-tricep-extension', name: 'Overhead Tricep Extension', category: 'push', muscles: [primary('triceps')] },
-  { id: 'close-grip-bench-press', name: 'Close-Grip Bench Press', category: 'push', muscles: [primary('triceps'), secondary('chest')] },
+  { id: 'close-grip-bench-press', name: 'Close-Grip Bench Press', category: 'push', muscles: [primary('triceps'), secondary('upper_chest'), secondary('mid_chest'), secondary('lower_chest')] },
 
   // Pull
   { id: 'deadlift', name: 'Deadlift', category: 'pull', muscles: [primary('lower_back'), primary('hamstrings'), primary('glutes'), secondary('traps'), secondary('forearms')] },
@@ -78,7 +80,7 @@ export const EXERCISES: Exercise[] = [
   { id: 'stair-climber', name: 'Stair Climber', category: 'cardio', muscles: [primary('quads'), primary('glutes'), secondary('calves')] },
   { id: 'jump-rope', name: 'Jump Rope', category: 'cardio', muscles: [primary('calves'), secondary('quads')] },
   { id: 'elliptical', name: 'Elliptical', category: 'cardio', muscles: [primary('quads'), primary('glutes'), secondary('hamstrings')] },
-  { id: 'burpees', name: 'Burpees', category: 'cardio', muscles: [primary('quads'), primary('chest'), secondary('abs'), secondary('front_delts')] },
+  { id: 'burpees', name: 'Burpees', category: 'cardio', muscles: [primary('quads'), primary('upper_chest'), primary('mid_chest'), primary('lower_chest'), secondary('abs'), secondary('front_delts')] },
   { id: 'mountain-climbers', name: 'Mountain Climbers', category: 'cardio', muscles: [primary('abs'), secondary('quads'), secondary('front_delts')] },
 ]
 

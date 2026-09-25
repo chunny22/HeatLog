@@ -1,5 +1,7 @@
 export type MuscleGroup =
-  | 'chest'
+  | 'upper_chest'
+  | 'mid_chest'
+  | 'lower_chest'
   | 'front_delts'
   | 'side_delts'
   | 'rear_delts'
@@ -19,11 +21,21 @@ export type MuscleGroup =
 
 export type ExerciseCategory = 'push' | 'pull' | 'legs' | 'core' | 'cardio'
 
+export interface MuscleTarget {
+  group: MuscleGroup
+  role: 'primary' | 'secondary'
+}
+
+/** Older custom exercises stored one undivided chest target. */
+export interface StoredMuscleTarget extends Omit<MuscleTarget, 'group'> {
+  group: MuscleGroup | 'chest'
+}
+
 export interface Exercise {
   id: string
   name: string
   category: ExerciseCategory
-  muscles: { group: MuscleGroup; role: 'primary' | 'secondary' }[]
+  muscles: MuscleTarget[]
 }
 
 export type WeightUnit = 'lb' | 'kg'

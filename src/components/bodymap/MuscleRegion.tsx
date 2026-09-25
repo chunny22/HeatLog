@@ -31,7 +31,7 @@ export function MuscleRegion({ shape, normalizedVolume, rawVolume }: MuscleRegio
         strokeWidth={1.5}
       >
         <title>
-          {MUSCLE_LABELS[shape.muscle]}: {Math.round(rawVolume).toLocaleString()} vol
+          {`${MUSCLE_LABELS[shape.muscle]}: ${Math.round(rawVolume).toLocaleString()} vol`}
         </title>
       </rect>
     </g>

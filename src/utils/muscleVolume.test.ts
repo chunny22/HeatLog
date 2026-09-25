@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { SetEntry, WorkoutSession } from '../types'
+import { expandLegacyChest } from '../data/muscles'
 import { computeMuscleVolume, normalizeVolumes, rpeFactor, setVolume } from './muscleVolume'
 
 const set = (reps: number, weight: number): SetEntry => ({ reps, weight, unit: 'lb' })
@@ -26,7 +27,9 @@ describe('computeMuscleVolume', () => {
 
   it('gives primary muscles full volume and secondary muscles half', () => {
     const v = computeMuscleVolume([session('2026-09-01', 'completed', bench, [set(5, 100)])])
-    expect(v.chest).toBe(500)
+    expect(v.upper_chest).toBe(500)
+    expect(v.mid_chest).toBe(500)
+    expect(v.lower_chest).toBe(500)
     expect(v.front_delts).toBe(250)
     expect(v.triceps).toBe(250)
     expect(v.quads).toBe(0)
@@ -34,7 +37,17 @@ describe('computeMuscleVolume', () => {
 
   it('ignores planned sessions', () => {
     const v = computeMuscleVolume([session('2026-09-01', 'planned', bench, [set(5, 100)])])
-    expect(v.chest).toBe(0)
+    expect(v.upper_chest).toBe(0)
+    expect(v.mid_chest).toBe(0)
+    expect(v.lower_chest).toBe(0)
+  })
+
+  it.each(['incline-bench-press', 'incline-dumbbell-press'])('emphasizes upper chest for %s', (id) => {
+    const v = computeMuscleVolume([session('2026-09-01', 'completed', id, [set(5, 100)])])
+    expect(v.upper_chest).toBe(500)
+    expect(v.mid_chest).toBe(250)
+    expect(v.lower_chest).toBe(250)
+    expect(normalizeVolumes(v).lower_chest).toBe(0.5)
   })
 
   it('skips exercises it does not recognise instead of throwing', () => {
@@ -48,9 +61,9 @@ describe('computeMuscleVolume', () => {
       session('2026-09-05', 'completed', bench, [set(1, 100)]),
       session('2026-09-10', 'completed', bench, [set(1, 100)]),
     ]
-    expect(computeMuscleVolume(sessions, '2026-09-05', '2026-09-05').chest).toBe(100)
-    expect(computeMuscleVolume(sessions, '2026-09-05').chest).toBe(200)
-    expect(computeMuscleVolume(sessions, undefined, '2026-09-05').chest).toBe(200)
+    expect(computeMuscleVolume(sessions, '2026-09-05', '2026-09-05').upper_chest).toBe(100)
+    expect(computeMuscleVolume(sessions, '2026-09-05').upper_chest).toBe(200)
+    expect(computeMuscleVolume(sessions, undefined, '2026-09-05').upper_chest).toBe(200)
   })
 
   it('adds up across sessions and sets', () => {
@@ -58,7 +71,7 @@ describe('computeMuscleVolume', () => {
       session('2026-09-01', 'completed', bench, [set(5, 100), set(5, 100)]),
       session('2026-09-02', 'completed', bench, [set(3, 200)]),
     ]
-    expect(computeMuscleVolume(sessions).chest).toBe(1000 + 600)
+    expect(computeMuscleVolume(sessions).upper_chest).toBe(1000 + 600)
   })
 })
 
@@ -68,7 +81,7 @@ describe('normalizeVolumes', () => {
       { id: 'a', date: '2026-09-01', status: 'completed', entries: [{ exerciseId: 'barbell-bench-press', sets: [set(5, 100)] }] },
     ])
     const n = normalizeVolumes(v)
-    expect(n.chest).toBe(1)
+    expect(n.upper_chest).toBe(1)
     expect(n.triceps).toBe(0.5)
   })
 
@@ -79,6 +92,27 @@ describe('normalizeVolumes', () => {
 })
 
 describe('computeMuscleVolume with custom exercises', () => {
+  it.each(['upper_chest', 'mid_chest', 'lower_chest'] as const)('keeps a custom %s exercise isolated to its selected region', (group) => {
+    const v = computeMuscleVolume(
+      [session('2026-09-01', 'completed', 'custom-chest', [set(5, 100)])], undefined, undefined,
+      { 'custom-chest': { id: 'custom-chest', name: 'Chest press', category: 'push', muscles: [{ group, role: 'primary' }] } },
+    )
+    expect(v[group]).toBe(500)
+    for (const other of ['upper_chest', 'mid_chest', 'lower_chest'] as const) {
+      if (other !== group) expect(v[other]).toBe(0)
+    }
+  })
+
+  it('preserves whole-chest heatmap coverage for an older custom exercise', () => {
+    const v = computeMuscleVolume(
+      [session('2026-09-01', 'completed', 'custom-old', [set(5, 100)])], undefined, undefined,
+      { 'custom-old': { id: 'custom-old', name: 'Old chest press', category: 'push', muscles: expandLegacyChest([{ group: 'chest', role: 'primary' }]) } },
+    )
+    expect(v.upper_chest).toBe(500)
+    expect(v.mid_chest).toBe(500)
+    expect(v.lower_chest).toBe(500)
+  })
+
   const sledPush = {
     id: 'custom-1',
     name: 'Sled push',
@@ -98,7 +132,7 @@ describe('computeMuscleVolume with custom exercises', () => {
     )
     expect(v.quads).toBe(200)
     expect(v.glutes).toBe(100)
-    expect(v.chest).toBe(0)
+    expect(v.upper_chest).toBe(0)
   })
 
   it('skips a custom id it has no definition for', () => {
@@ -130,7 +164,7 @@ describe('computeMuscleVolume with RPE', () => {
   const bench = 'barbell-bench-press'
   const rated = (rpe: number | undefined): SetEntry => ({ reps: 5, weight: 100, unit: 'lb', intensity: rpe })
   const chest = (sets: SetEntry[]) =>
-    computeMuscleVolume([session('2026-09-01', 'completed', bench, sets)]).chest
+    computeMuscleVolume([session('2026-09-01', 'completed', bench, sets)]).upper_chest
 
   it('counts a harder set for more than an easier one with the same reps and weight', () => {
     expect(chest([rated(10)])).toBeCloseTo(600, 6)

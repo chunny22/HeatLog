@@ -3,7 +3,7 @@ import schema from '../../supabase/schema.sql?raw'
 import { muscleColor } from '../utils/colorScale'
 import { EXERCISES } from './exercises'
 import { GOALS } from './goals'
-import { ALL_MUSCLES, MUSCLE_LABELS } from './muscles'
+import { ALL_MUSCLES, MUSCLE_LABELS, expandLegacyChest } from './muscles'
 
 describe('goals', () => {
   it('match the goal values the database allows (schema.sql check constraint)', () => {
@@ -30,6 +30,20 @@ describe('exercise data', () => {
         expect(ALL_MUSCLES, `${exercise.id} -> ${group}`).toContain(group)
         expect(MUSCLE_LABELS[group], group).toBeTruthy()
       }
+    }
+  })
+})
+
+describe('legacy chest targets', () => {
+  it('does not duplicate a region or overwrite its explicit role in either order', () => {
+    const legacy = { group: 'chest', role: 'primary' } as const
+    const upper = { group: 'upper_chest', role: 'secondary' } as const
+    for (const targets of [[legacy, upper], [upper, legacy]]) {
+      expect(expandLegacyChest(targets)).toEqual([
+        { group: 'upper_chest', role: 'secondary' },
+        { group: 'mid_chest', role: 'primary' },
+        { group: 'lower_chest', role: 'primary' },
+      ])
     }
   })
 })
