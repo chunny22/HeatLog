@@ -16,12 +16,12 @@ function formatDate(iso: string): string {
 
 export function StrengthPanel({ sessions, unit }: { sessions: WorkoutSession[]; unit: WeightUnit }) {
   const { exercisesById } = useExercises()
-  const exerciseIds = useMemo(() => exercisesWithHistory(sessions), [sessions])
+  const exerciseIds = useMemo(() => exercisesWithHistory(sessions, exercisesById), [sessions, exercisesById])
   const [picked, setPicked] = useState<string | null>(null)
   const [range, setRange] = useState<Range>('90d')
 
   const exerciseId = picked && exerciseIds.includes(picked) ? picked : exerciseIds[0]
-  const all = useMemo(() => (exerciseId ? strengthSeries(sessions, exerciseId, unit) : []), [sessions, exerciseId, unit])
+  const all = useMemo(() => (exerciseId ? strengthSeries(sessions, exerciseId, unit, exercisesById) : []), [sessions, exerciseId, unit, exercisesById])
   const series = useMemo(() => filterByRange(all, range), [all, range])
 
   if (exerciseIds.length === 0) {

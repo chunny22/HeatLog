@@ -40,6 +40,23 @@ export interface Exercise {
 
 export type WeightUnit = 'lb' | 'kg'
 
+export type CardioTracking = 'distance' | 'steps' | 'jumps' | 'reps'
+export type DistanceUnit = 'km' | 'mi' | 'm'
+
+export interface CardioInterval {
+  durationMinutes: number
+  distance?: number
+  distanceUnit?: DistanceUnit
+  count?: number
+  intensity?: number
+}
+
+export interface CardioLog {
+  /** Keep the recorded measurement type even if a custom exercise is edited. */
+  tracking: CardioTracking
+  intervals: CardioInterval[]
+}
+
 export interface SetEntry {
   reps: number
   weight: number
@@ -51,6 +68,8 @@ export interface SetEntry {
 export interface WorkoutEntry {
   exerciseId: string
   sets: SetEntry[]
+  /** New cardio uses intervals; sets remain for compatibility with older logs. */
+  cardio?: CardioLog
 }
 
 export type WorkoutStatus = 'planned' | 'completed'

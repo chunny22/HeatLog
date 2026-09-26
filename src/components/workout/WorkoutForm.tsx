@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useExercises } from '../../exercises/ExerciseContext'
-import type { Exercise, SetEntry, WorkoutEntry, WorkoutSession, WorkoutStatus } from '../../types'
+import type { CardioLog, Exercise, SetEntry, WorkoutEntry, WorkoutSession, WorkoutStatus } from '../../types'
+import { isCardioEntry, newCardioLog, validateCardioEntries } from '../../utils/cardio'
 import { Alert } from '../Alert'
 import { CalendarIcon, PlusIcon, TrashIcon } from '../icons'
 import {
@@ -15,7 +16,8 @@ import {
 } from '../ui'
 import { useProfile } from '../../profile/ProfileContext'
 import { ExercisePicker } from './ExercisePicker'
-import { LastTimeHint } from './LastTimeHint'
+import { CardioLastTimeHint, LastTimeHint } from './LastTimeHint'
+import { CardioForm } from './CardioForm'
 import { SetRow, SetRowHeader } from './SetRow'
 
 
@@ -40,7 +42,9 @@ export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFor
 
   const addExercise = (exercise: Exercise) => {
     if (entries.some((e) => e.exerciseId === exercise.id)) return
-    setEntries([...entries, { exerciseId: exercise.id, sets: [blankSet()] }])
+    setEntries([...entries, exercise.category === 'cardio'
+      ? { exerciseId: exercise.id, sets: [], cardio: newCardioLog(exercise.id, defaultUnit) }
+      : { exerciseId: exercise.id, sets: [blankSet()] }])
   }
 
   const removeExercise = (exerciseId: string) => {
@@ -60,8 +64,15 @@ export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFor
     }))
   }
 
+  const updateCardio = (exerciseId: string, cardio: CardioLog) => {
+    setError(null)
+    setEntries((current) => current.map((entry) => entry.exerciseId === exerciseId ? { ...entry, cardio } : entry))
+  }
+
   const handleSave = async () => {
     if (entries.length === 0) return
+    const problem = validateCardioEntries(entries, exercisesById)
+    if (problem) { setError(problem); return }
     setSaving(true)
     setError(null)
 
@@ -70,6 +81,7 @@ export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFor
         ? entries.map((entry) => ({
             ...entry,
             sets: entry.sets.map((set) => ({ ...set, intensity: undefined })),
+            ...(entry.cardio ? { cardio: { ...entry.cardio, intervals: entry.cardio.intervals.map(({ intensity: _intensity, ...interval }) => interval) } } : {}),
           }))
         : entries
 
@@ -121,6 +133,7 @@ export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFor
 
       {entries.map((entry) => {
         const exercise = exercisesById[entry.exerciseId]
+        const cardio = isCardioEntry(entry, exercise) ? entry.cardio ?? newCardioLog(entry.exerciseId, defaultUnit) : null
         return (
           <section key={entry.exerciseId} className={`${cardClass} flex flex-col gap-3.5`}>
             <div className="flex items-center justify-between gap-3">
@@ -134,34 +147,45 @@ export function WorkoutForm({ date, sessions, onDateChange, onSave }: WorkoutFor
                 <TrashIcon size={17} />
               </button>
             </div>
-            <LastTimeHint
-              sessions={sessions}
-              exerciseId={entry.exerciseId}
-              date={date}
-              onUse={(sets) => updateSets(entry.exerciseId, sets)}
-            />
-            <SetRowHeader showIntensity={status === 'completed'} />
-            {entry.sets.map((set, i) => (
-              <SetRow
-                key={i}
-                index={i}
-                set={set}
-                showIntensity={status === 'completed'}
-                onChange={(updated) => {
-                  const sets = [...entry.sets]
-                  sets[i] = updated
-                  updateSets(entry.exerciseId, sets)
-                }}
-                onRemove={() => updateSets(entry.exerciseId, entry.sets.filter((_, si) => si !== i))}
-              />
-            ))}
-            <button
-              onClick={() => addSet(entry.exerciseId)}
-              className={`${btnSoftSmClass} self-start pl-3`}
-            >
-              <PlusIcon size={16} />
-              Add set
-            </button>
+            {cardio ? (
+              <>
+                <CardioLastTimeHint sessions={sessions} exerciseId={entry.exerciseId} date={date}
+                  onUse={(value) => updateCardio(entry.exerciseId, value)} />
+                <CardioForm value={cardio} showIntensity={status === 'completed'}
+                  onChange={(value) => updateCardio(entry.exerciseId, value)} />
+              </>
+            ) : (
+              <>
+                <LastTimeHint
+                  sessions={sessions}
+                  exerciseId={entry.exerciseId}
+                  date={date}
+                  onUse={(sets) => updateSets(entry.exerciseId, sets)}
+                />
+                <SetRowHeader showIntensity={status === 'completed'} />
+                {entry.sets.map((set, i) => (
+                  <SetRow
+                    key={i}
+                    index={i}
+                    set={set}
+                    showIntensity={status === 'completed'}
+                    onChange={(updated) => {
+                      const sets = [...entry.sets]
+                      sets[i] = updated
+                      updateSets(entry.exerciseId, sets)
+                    }}
+                    onRemove={() => updateSets(entry.exerciseId, entry.sets.filter((_, si) => si !== i))}
+                  />
+                ))}
+                <button
+                  onClick={() => addSet(entry.exerciseId)}
+                  className={`${btnSoftSmClass} self-start pl-3`}
+                >
+                  <PlusIcon size={16} />
+                  Add set
+                </button>
+              </>
+            )}
           </section>
         )
       })}

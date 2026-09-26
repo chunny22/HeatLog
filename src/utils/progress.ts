@@ -1,4 +1,6 @@
-import type { SetEntry, WeightUnit, WorkoutSession } from '../types'
+import type { Exercise, SetEntry, WeightUnit, WorkoutSession } from '../types'
+import { EXERCISES_BY_ID } from '../data/exercises'
+import { isCardioEntry } from './cardio'
 
 const LB_PER_KG = 2.20462
 
@@ -44,11 +46,12 @@ export interface StrengthPoint {
 }
 
 /** Exercises with at least one completed weighted set, most recently trained first. */
-export function exercisesWithHistory(sessions: WorkoutSession[]): string[] {
+export function exercisesWithHistory(sessions: WorkoutSession[], exercises: Record<string, Exercise> = EXERCISES_BY_ID): string[] {
   const lastSeen = new Map<string, string>()
   for (const session of sessions) {
     if (session.status !== 'completed') continue
     for (const entry of session.entries) {
+      if (isCardioEntry(entry, exercises[entry.exerciseId])) continue
       if (!entry.sets.some(isWorkingSet)) continue
       const prev = lastSeen.get(entry.exerciseId)
       if (!prev || session.date > prev) lastSeen.set(entry.exerciseId, session.date)
@@ -58,13 +61,14 @@ export function exercisesWithHistory(sessions: WorkoutSession[]): string[] {
 }
 
 /** Best estimated one-rep max per session for one exercise, oldest first, in `unit`. */
-export function strengthSeries(sessions: WorkoutSession[], exerciseId: string, unit: WeightUnit): StrengthPoint[] {
+export function strengthSeries(sessions: WorkoutSession[], exerciseId: string, unit: WeightUnit, exercises: Record<string, Exercise> = EXERCISES_BY_ID): StrengthPoint[] {
   const byDate = new Map<string, StrengthPoint>()
 
   for (const session of sessions) {
     if (session.status !== 'completed') continue
     for (const entry of session.entries) {
       if (entry.exerciseId !== exerciseId) continue
+      if (isCardioEntry(entry, exercises[entry.exerciseId])) continue
       for (const set of entry.sets) {
         if (!isWorkingSet(set)) continue
         const weight = convertWeight(set.weight, set.unit, unit)

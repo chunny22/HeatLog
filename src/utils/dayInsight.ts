@@ -22,7 +22,7 @@ export function buildDaySummary(
   for (const session of sessions) {
     for (const entry of session.entries) {
       exerciseIds.add(entry.exerciseId)
-      for (const set of entry.sets) {
+      for (const set of entry.cardio?.intervals ?? entry.sets) {
         if (set.intensity && set.intensity > 0) {
           rpes.set(entry.exerciseId, [...(rpes.get(entry.exerciseId) ?? []), set.intensity])
         }

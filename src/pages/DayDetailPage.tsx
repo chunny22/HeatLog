@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Alert } from '../components/Alert'
+import { CardioSummary } from '../components/CardioSummary'
 import { BodyMapBack } from '../components/bodymap/BodyMapBack'
 import { BodyMapFront } from '../components/bodymap/BodyMapFront'
 import { IntensityLegend } from '../components/bodymap/IntensityLegend'
@@ -59,7 +60,7 @@ export function DayDetailPage() {
 
       <section className={`${cardClass} flex flex-col gap-5`}>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className={cardTitleClass}>Muscles worked</h2>
+          <h2 className={cardTitleClass}>Strength muscles worked</h2>
           <IntensityLegend />
         </div>
         <p className="-mt-2 text-xs text-muted">
@@ -78,6 +79,7 @@ export function DayDetailPage() {
       </section>
 
       <DayDetailPanel date={date} sessions={daySessions} onDeleteSession={deleteSession} />
+      <CardioSummary sessions={daySessions} unit={profile?.unitPreference ?? 'lb'} showMuscles />
 
       {daySessions.length > 0 ? (
         coachHidden ? (

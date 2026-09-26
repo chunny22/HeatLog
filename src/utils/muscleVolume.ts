@@ -1,6 +1,7 @@
 import { EXERCISES_BY_ID } from '../data/exercises'
 import { ALL_MUSCLES } from '../data/muscles'
 import type { Exercise, MuscleGroup, WorkoutSession } from '../types'
+import { isCardioEntry } from './cardio'
 
 const SECONDARY_WEIGHT = 0.5
 
@@ -36,7 +37,7 @@ export function computeMuscleVolume(
 
     for (const entry of session.entries) {
       const exercise = exercisesById[entry.exerciseId]
-      if (!exercise) continue
+      if (!exercise || isCardioEntry(entry, exercise)) continue
 
       const entryVolume = entry.sets.reduce(
         (sum, set) => sum + setVolume(set.reps, set.weight) * rpeFactor(set.intensity),

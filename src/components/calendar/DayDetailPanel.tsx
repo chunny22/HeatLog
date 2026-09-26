@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useExercises } from '../../exercises/ExerciseContext'
 import { useConfirm } from '../../hooks/useConfirm'
 import type { WorkoutSession } from '../../types'
+import { formatCardioInterval, isCardioEntry } from '../../utils/cardio'
 import { CheckIcon, ClockIcon, PlusIcon, TrashIcon } from '../icons'
 import { btnSoftSmClass, cardClass, cardTitleClass } from '../ui'
 
@@ -84,9 +85,14 @@ export function DayDetailPanel({ date, sessions, onDeleteSession }: DayDetailPan
                 >
                   <span className="text-[15px] font-bold text-ink">{exercise?.name ?? entry.exerciseId}</span>
                   <span className="flex flex-wrap gap-1.5">
+                    {entry.cardio?.intervals.map((interval, ci) => (
+                      <span key={`cardio-${ci}`} className="rounded-full bg-sunken px-2.5 py-1 text-xs font-semibold text-ink-2">
+                        {formatCardioInterval(interval, entry.cardio!.tracking)}
+                      </span>
+                    ))}
                     {entry.sets.map((set, si) => (
                       <span key={si} className="rounded-full bg-sunken px-2.5 py-1 text-xs font-semibold text-ink-2">
-                        {formatSet(set)}
+                        {isCardioEntry(entry, exercise) ? 'Earlier entry: ' : ''}{formatSet(set)}
                       </span>
                     ))}
                   </span>

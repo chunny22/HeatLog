@@ -1,5 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Alert } from '../components/Alert'
+import { CardioSummary } from '../components/CardioSummary'
+import { useExercises } from '../exercises/ExerciseContext'
+import { daysAgoISO, todayISO } from '../utils/date'
 import { ActivityLineChart } from '../components/breakdown/ActivityLineChart'
 import { ActivityStatTile } from '../components/breakdown/ActivityStatTile'
 import { BodyWeightPanel } from '../components/breakdown/BodyWeightPanel'
@@ -22,9 +25,10 @@ const TABS: { value: Tab; label: string }[] = [
 export function BreakdownPage() {
   const { sessions, loading, error } = useSessions()
   const { profile } = useProfile()
+  const { exercisesById } = useExercises()
   const [tab, setTab] = useState<Tab>('activity')
 
-  const series = useMemo(() => computeDailyVolume(sessions, WINDOW_DAYS), [sessions])
+  const series = useMemo(() => computeDailyVolume(sessions, WINDOW_DAYS, exercisesById), [sessions, exercisesById])
   const mostActive = useMemo(() => findMostActiveDay(series), [series])
   const leastActive = useMemo(() => findLeastActiveDay(series), [series])
   const hasActivity = series.some((d) => d.volume > 0)
@@ -51,15 +55,16 @@ export function BreakdownPage() {
 
       {tab === 'activity' && (
         <>
-          <p className="text-[13px] text-ink-3">Training volume (reps × weight) over the last {WINDOW_DAYS} days.</p>
+          <p className="text-[13px] text-ink-3">Strength volume and cardio over the last {WINDOW_DAYS} days.</p>
+          <CardioSummary sessions={sessions.filter((s) => s.date >= daysAgoISO(WINDOW_DAYS - 1) && s.date <= todayISO())} unit={unit} />
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <ActivityStatTile label="Most active day" day={mostActive} accent="indigo" />
-            <ActivityStatTile label="Least active day" day={leastActive} accent="gray" />
+            <ActivityStatTile label="Highest strength volume" day={mostActive} accent="indigo" />
+            <ActivityStatTile label="Lowest strength volume" day={leastActive} accent="gray" />
           </div>
 
           <section className={`${cardClass} flex flex-col gap-5`}>
             <div className="flex items-center justify-between gap-3">
-              <h2 className={cardTitleClass}>Daily volume</h2>
+              <h2 className={cardTitleClass}>Daily strength volume</h2>
               <span className="rounded-full bg-sunken px-3 py-1.5 text-xs font-bold text-ink-2">
                 Last {WINDOW_DAYS} days
               </span>
@@ -67,7 +72,7 @@ export function BreakdownPage() {
             {hasActivity ? (
               <ActivityLineChart series={series} />
             ) : (
-              <p className="py-16 text-center text-sm text-muted">No completed workouts in the last {WINDOW_DAYS} days.</p>
+              <p className="py-16 text-center text-sm text-muted">No completed strength workouts in the last {WINDOW_DAYS} days.</p>
             )}
           </section>
         </>
