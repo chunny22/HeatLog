@@ -1,15 +1,19 @@
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import { useExercises } from '../../exercises/ExerciseContext'
 import { useConfirm } from '../../hooks/useConfirm'
 import type { WorkoutSession } from '../../types'
 import { formatCardioInterval, isCardioEntry } from '../../utils/cardio'
 import { CheckIcon, ClockIcon, PlusIcon, TrashIcon } from '../icons'
 import { btnSoftSmClass, cardClass, cardTitleClass } from '../ui'
+import { WorkoutDateActions, type ChangeWorkoutDate, type DateAction } from './WorkoutDateActions'
 
 interface DayDetailPanelProps {
   date: string
   sessions: WorkoutSession[]
   onDeleteSession: (id: string) => void
+  onMoveSession: ChangeWorkoutDate
+  onDuplicateSession: ChangeWorkoutDate
 }
 
 function formatSet(set: WorkoutSession['entries'][number]['sets'][number]) {
@@ -17,9 +21,10 @@ function formatSet(set: WorkoutSession['entries'][number]['sets'][number]) {
   return set.intensity ? `${base} · RPE ${set.intensity}` : base
 }
 
-export function DayDetailPanel({ date, sessions, onDeleteSession }: DayDetailPanelProps) {
+export function DayDetailPanel({ date, sessions, onDeleteSession, onMoveSession, onDuplicateSession }: DayDetailPanelProps) {
   const { confirm, dialog } = useConfirm()
   const { exercisesById } = useExercises()
+  const [notice, setNotice] = useState<{ action: DateAction; date: string } | null>(null)
 
   return (
     <section className={`${cardClass} flex flex-col gap-4`}>
@@ -35,6 +40,14 @@ export function DayDetailPanel({ date, sessions, onDeleteSession }: DayDetailPan
       </div>
 
       {sessions.length === 0 && <p className="text-sm text-muted">No workouts logged for this day.</p>}
+      {notice && (
+        <p role="status" className="rounded-field bg-success-soft p-3 text-sm text-success-ink">
+          {notice.action === 'move' ? 'Workout moved.' : 'Workout duplicated as a plan.'}{' '}
+          <Link className="font-bold underline" to={`/day/${notice.date}`}>
+            View {new Date(`${notice.date}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+          </Link>
+        </p>
+      )}
 
       {sessions.map((session) => (
         <article key={session.id} className="flex flex-col gap-3.5 rounded-panel bg-inset p-4 sm:p-5">
@@ -100,6 +113,8 @@ export function DayDetailPanel({ date, sessions, onDeleteSession }: DayDetailPan
               )
             })}
           </ul>
+          <WorkoutDateActions session={session} onMove={onMoveSession} onDuplicate={onDuplicateSession}
+            onSuccess={(action, targetDate) => setNotice({ action, date: targetDate })} />
         </article>
       ))}
       {dialog}

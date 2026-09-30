@@ -20,7 +20,7 @@ const DEFAULT_GOALS: FitnessGoal[] = ['general_fitness']
 
 export function DayDetailPage() {
   const { date } = useParams<{ date: string }>()
-  const { sessions, loading, error, deleteSession } = useSessions()
+  const { sessions, loading, error, deleteSession, moveSession, duplicateSession } = useSessions()
   const { profile } = useProfile()
   const { hidden: coachHidden, hide: hideCoach, show: showCoach } = useCoachPreference()
 
@@ -78,7 +78,8 @@ export function DayDetailPage() {
         </div>
       </section>
 
-      <DayDetailPanel date={date} sessions={daySessions} onDeleteSession={deleteSession} />
+      <DayDetailPanel key={date} date={date} sessions={daySessions} onDeleteSession={deleteSession}
+        onMoveSession={moveSession} onDuplicateSession={duplicateSession} />
       <CardioSummary sessions={daySessions} unit={profile?.unitPreference ?? 'lb'} showMuscles />
 
       {daySessions.length > 0 ? (

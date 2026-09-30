@@ -1,18 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../supabase'
 import type { WorkoutEntry, WorkoutSession, WorkoutStatus } from '../types'
-
-interface SessionRow {
-  id: string
-  date: string
-  notes: string | null
-  entries: WorkoutEntry[]
-  status: WorkoutStatus
-}
-
-function rowToSession(row: SessionRow): WorkoutSession {
-  return { id: row.id, date: row.date, notes: row.notes ?? undefined, entries: row.entries, status: row.status }
-}
+import { duplicateWorkout, moveWorkout, rowToSession, type SessionRow } from '../data/sessionActions'
 
 export function useSessions() {
   const [sessions, setSessions] = useState<WorkoutSession[]>([])
@@ -76,5 +65,22 @@ export function useSessions() {
     [refresh],
   )
 
-  return { sessions, loading, error, refresh, addSession, completeSession, deleteSession }
+  const moveSession = useCallback(async (id: string, date: string) => {
+    const result = await moveWorkout(id, date)
+    if (result.session) {
+      setSessions((current) => current.map((session) => session.id === id ? result.session : session)
+        .sort((a, b) => b.date.localeCompare(a.date)))
+    }
+    return { error: result.error }
+  }, [])
+
+  const duplicateSession = useCallback(async (id: string, date: string) => {
+    const result = await duplicateWorkout(id, date)
+    if (result.session) {
+      setSessions((current) => [result.session, ...current].sort((a, b) => b.date.localeCompare(a.date)))
+    }
+    return { error: result.error }
+  }, [])
+
+  return { sessions, loading, error, refresh, addSession, completeSession, deleteSession, moveSession, duplicateSession }
 }
